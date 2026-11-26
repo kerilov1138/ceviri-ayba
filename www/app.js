@@ -1378,6 +1378,7 @@ function appendMessage({
   latencyMs,
   senderId,
   color,
+  timestamp,
 }) {
   if (id && state.seenMessageIds.has(id)) return;
   if (id) state.seenMessageIds.add(id);
@@ -1388,6 +1389,7 @@ function appendMessage({
 
   const msg = {
     id: id || Date.now() + Math.random(),
+    ts: typeof timestamp === 'number' ? timestamp : Date.now(),
     speaker,
     senderName: senderName || (speaker === 'me' ? t('who.meUpper') : t('who.partnerUpper')),
     sourceLang,
@@ -1881,6 +1883,15 @@ function connectToRoom(roomCode) {
   });
 
   es.addEventListener('file_message', (event) => onFileMessage(JSON.parse(event.data), roomCode));
+  es.addEventListener('ayba_event', (event) => {
+    if (window.AybaHooks && typeof window.AybaHooks.roomEvent === 'function') {
+      try {
+        window.AybaHooks.roomEvent(JSON.parse(event.data));
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+  });
   es.addEventListener('file_progress', (event) => onFileProgress(JSON.parse(event.data)));
   es.addEventListener('file_ready', (event) => onFileReady(JSON.parse(event.data)));
   es.addEventListener('file_failed', (event) => onFileFailed(JSON.parse(event.data)));
@@ -2144,6 +2155,7 @@ function onFileMessage(meta, roomCode) {
 
   state.messages.push({
     id: meta.id,
+    ts: typeof meta.timestamp === 'number' ? meta.timestamp : Date.now(),
     speaker,
     senderName: who,
     sourceLang: state.myLang,
@@ -3356,6 +3368,24 @@ window.AybaApp = {
   },
   lock() {
     return window.CeviriRelay.setLocked(state.roomCode, true);
+  },
+  unlock() {
+    return window.CeviriRelay.setLocked(state.roomCode, false);
+  },
+  /** Uye: devretme icin yeni tek kullanimlik oda anahtari */
+  newInvite() {
+    return window.CeviriRelay.createInvite(state.roomCode);
+  },
+  sendEvent(data) {
+    return window.CeviriRelay.sendAyba(state.roomCode, data);
+  },
+  /** Yazili mesaji gonderir (cevrilerek gider) */
+  sendText(text) {
+    els.textInput.value = text;
+    els.textTranslateForm.requestSubmit();
+  },
+  get participants() {
+    return (state.participants || []).slice();
   },
   leave() {
     if (state.roomCode) leaveOnlineRoom();

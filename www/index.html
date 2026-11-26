@@ -76,6 +76,19 @@
     </div>
 
     <div id="aybaToast" class="ayba-toast hidden" role="status" aria-live="assertive"></div>
+    <div id="aybaTransferModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aybaTransferTitle">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="aybaTransferTitle" data-i18n="ayba.transferTitle">Görüşmeyi devret</h3>
+          <button id="aybaTransferClose" class="icon-btn" aria-label="Kapat" data-i18n-attr="aria-label:settings.close">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="ayba-muted" data-i18n="ayba.transferText">Görüşmeyi devralacak yöneticiyi seçin. O kabul edince siz görüşmeden ayrılırsınız; dökümde devir anı ayrıca gösterilir.</p>
+          <p id="aybaTransferEmpty" class="ayba-muted hidden" data-i18n="ayba.transferNone">Çevrimiçi başka yönetici yok.</p>
+          <div id="aybaTransferList" class="ayba-transfer-list"></div>
+        </div>
+      </div>
+    </div>
     <!-- Canli destek paneli (uye / yonetici) -->
     <section id="aybaPanel" class="ayba-panel" aria-live="polite">
       <div class="ayba-who-row">
@@ -104,17 +117,31 @@
 
       <!-- Uye -->
       <div id="aybaMember" class="hidden">
+        <p id="aybaNoAdmin" class="ayba-noadmin hidden" data-i18n="ayba.noAdmin">Şu an çevrimiçi yönetici yok. Sorunuzu yine de gönderebilirsiniz; ilk gelen yönetici size bağlanır.</p>
         <div id="aybaMemberIdle" class="ayba-card">
           <h2 data-i18n="ayba.memberTitle">Sorunuz mu var?</h2>
           <p class="ayba-muted" data-i18n="ayba.memberIntro">Bir site yöneticisi sizinle birebir, canlı görüşür. Farklı dil konuşuyorsanız konuşmalar anında çevrilir. Aşağıdan konuştuğunuz dili seçin.</p>
           <p id="aybaMemberEnded" class="ayba-ended hidden" data-i18n="ayba.ended">Görüşme sona erdi. Yeni bir sorunuz olursa tekrar yazabilirsiniz.</p>
-          <button id="aybaAskBtn" type="button" class="online-btn primary ayba-big" data-i18n="ayba.ask">Soru sormak istiyorum</button>
-          <p id="aybaLangHint" class="ayba-lang-hint hidden" data-i18n="ayba.chooseLangFirst">Önce aşağıdan konuştuğunuz dili seçin.</p>
+          <div id="aybaRate" class="ayba-rate hidden">
+            <strong data-i18n="ayba.rateTitle">Yardımcı olabildik mi?</strong>
+            <div id="aybaStars" class="ayba-stars" role="group" data-i18n-attr="aria-label:ayba.rateTitle"></div>
+            <textarea id="aybaRateComment" class="online-input ayba-textarea" rows="2" maxlength="500" data-i18n-attr="placeholder:ayba.rateComment"></textarea>
+            <button id="aybaRateSend" type="button" class="online-btn primary" data-i18n="ayba.rateSend">Puanı gönder</button>
+          </div>
+          <p id="aybaRateThanks" class="ayba-muted hidden" data-i18n="ayba.rateThanks">Teşekkürler, puanınız iletildi.</p>
+          <div class="ayba-ask-box">
+            <label for="aybaTopic" class="ayba-topic-label" data-i18n="ayba.topicLabel">Sorunuzun konusu</label>
+            <textarea id="aybaTopic" class="online-input ayba-textarea" rows="3" maxlength="200" data-i18n-attr="placeholder:ayba.topicPh"></textarea>
+            <p id="aybaLangHint" class="ayba-lang-hint hidden" data-i18n="ayba.chooseLangFirst">Önce aşağıdan konuştuğunuz dili seçin.</p>
+            <p id="aybaTopicHint" class="ayba-lang-hint hidden" data-i18n="ayba.topicFirst">Sorunuzun konusunu kısaca yazın.</p>
+            <button id="aybaAskBtn" type="button" class="online-btn primary ayba-big" data-i18n="ayba.ask">Soru sormak istiyorum</button>
+          </div>
         </div>
         <div id="aybaMemberWaiting" class="ayba-card hidden">
           <div class="ayba-spinner" aria-hidden="true"></div>
           <h2 data-i18n="ayba.waitTitle">Sıradasınız</h2>
           <p class="ayba-muted" data-i18n="ayba.waitText">Bir yönetici birazdan bağlanacak. Bu sayfayı kapatmayın.</p>
+          <p id="aybaQueueInfo" class="ayba-queue-info" aria-live="polite"></p>
           <button id="aybaCancelBtn" type="button" class="online-btn secondary" data-i18n="ayba.cancel">Vazgeç</button>
         </div>
         <div id="aybaMemberInCall" class="hidden"></div>
@@ -149,6 +176,7 @@
           </section>
           <section id="aybaDocs" class="ayba-card hidden">
             <h2 data-i18n="ayba.docs">Bu oturumdaki dökümler</h2>
+            <p id="aybaDocPending" class="ayba-muted hidden"></p>
             <ul id="aybaDocList" class="ayba-doc-list"></ul>
           </section>
         </div>

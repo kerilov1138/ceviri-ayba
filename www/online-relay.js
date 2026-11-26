@@ -36,7 +36,7 @@
   // Uctan uca sifrelenen (yalnizca kabul edilenlerin okuyabilecegi) mesaj turleri.
   // Bunlarin disindakiler (presence/hello/leave/invite/approve/keyshare) el sikisma
   // katmanidir ve oda kodundan turetilen anahtarla sarilir.
-  var CONTENT_TYPES = { chat: 1, history: 1, 'file-meta': 1, 'file-chunk': 1, 'file-req': 1, mic: 1, hand: 1, cam: 1, mute: 1, rtc: 1 };
+  var CONTENT_TYPES = { chat: 1, history: 1, 'file-meta': 1, 'file-chunk': 1, 'file-req': 1, mic: 1, hand: 1, cam: 1, mute: 1, rtc: 1, ayba: 1 };
   var ROOM_CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
   function sanitizeRoomCode(raw) {
@@ -736,6 +736,12 @@
 
     if (msg.type === 'rtc') {
       if (this.self && msg.to === this.self.clientId && msg.data) this.emitFile('rtc_signal', { from: msg.from, data: msg.data });
+      return;
+    }
+
+    // Canli destek: oda icindeki denetim mesajlari (devretme, puan istegi)
+    if (msg.type === 'ayba') {
+      if (msg.data && typeof msg.data === 'object') this.emitFile('ayba_event', { from: msg.from, data: msg.data });
       return;
     }
 
@@ -1637,6 +1643,12 @@
     setMute: function (code, on) {
       var room = rooms[sanitizeRoomCode(code)];
       if (room) room.setMute(on);
+    },
+    /** Canli destek: odadakilere (uctan uca sifreli) denetim mesaji */
+    sendAyba: function (code, data) {
+      var room = rooms[sanitizeRoomCode(code)];
+      if (!room || !room.self) return Promise.resolve(0);
+      return room.send({ type: 'ayba', data: data });
     },
     /** WebRTC sinyal mesajini (teklif/cevap/aday) tek bir kisiye gonderir. */
     sendSignal: function (code, to, data) {

@@ -54,30 +54,62 @@
    * L: etiketler ({ title, start, end, duration, admin, customer, company,
    *    customerLang, count, original, translation })
    */
+  function hm(d) {
+    d = new Date(d);
+    return pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+  function fill(tpl, vars) {
+    return String(tpl || '').replace(/\{(\w+)\}/g, function (m, k) { return vars[k] != null ? vars[k] : m; });
+  }
+
   function buildHtml(meta, messages, L, langName) {
+    var hin = meta.handoverIn;
+    var bannerDone = !hin;
+    var banner = function (text) {
+      return '<div class="hb" dir="auto">⇄ ' + esc(text) + '</div>';
+    };
     var rows = messages.map(function (m) {
+      var pre = '';
+      if (!bannerDone && (Number(m.ts) || 0) >= hin.at) {
+        bannerDone = true;
+        pre = banner(fill(L.handover, { time: hm(hin.at), from: hin.fromName, to: hin.toName }));
+      }
+      var prev = hin && !bannerDone && m.senderName === hin.fromName;
       var langs = m.targetLang && m.targetLang !== m.sourceLang
         ? langName(m.sourceLang) + ' → ' + langName(m.targetLang)
         : langName(m.sourceLang);
       var mine = m.speaker === 'me';
       var showT = m.translatedText && m.translatedText !== m.originalText && m.targetLang !== m.sourceLang;
-      return '<div class="m ' + (mine ? 'a' : 'c') + '">' +
+      return pre + '<div class="m ' + (prev ? 'p' : mine ? 'a' : 'c') + '">' +
         '<div class="w">' + esc(m.senderName) + ' · ' + esc(m.time) + ' · ' + esc(langs) + '</div>' +
         '<div class="o" dir="auto">' + (showT ? '<span class="l">' + esc(L.original) + ':</span> ' : '') + esc(m.originalText) + '</div>' +
         (showT ? '<div class="t" dir="auto"><span class="l">' + esc(L.translation) + ':</span> ' + esc(m.translatedText) + '</div>' : '') +
         '</div>';
     }).join('');
+    if (!bannerDone) rows += banner(fill(L.handover, { time: hm(hin.at), from: hin.fromName, to: hin.toName }));
+    if (meta.handoverOut) rows += banner(fill(L.handedOut, { time: hm(meta.handoverOut.at), to: meta.handoverOut.toName }));
     var customer = (meta.customerName + ' ' + (meta.customerSurname || '')).trim();
+    var admins = (meta.segments || []).map(function (sg) {
+      return sg.admin + ' (' + hm(sg.from) + '–' + hm(sg.to) + ')';
+    }).join(' → ') || meta.adminName;
+    var ratingText;
+    var transferText = '';
+    if (meta.handoverOut) transferText = fill(L.handedTo, { name: meta.handoverOut.toName, time: hm(meta.handoverOut.at) });
+    else if (hin) transferText = hin.fromName + ' → ' + hin.toName + ' (' + hm(hin.at) + ')';
+    if (meta.rating) ratingText = '★★★★★'.slice(0, meta.rating.stars) + '☆☆☆☆☆'.slice(0, 5 - meta.rating.stars) + '  ' + meta.rating.stars + '/5';
+    else ratingText = L.noRating;
     var info = [
       [L.start, stamp(meta.start)],
       [L.end, stamp(meta.end)],
       [L.duration, duration(meta.end - meta.start)],
-      [L.admin, meta.adminName],
+      [L.admin, admins],
       [L.customer, customer],
       [L.company, meta.company || '-'],
+      [L.topic, meta.topic || '-'],
       [L.customerLang, meta.customerLang ? langName(meta.customerLang) : '-'],
+    ].concat(transferText ? [[L.transfer, transferText]] : []).concat(meta.handoverOut ? [] : [[L.rating, ratingText]]).concat(meta.rating && meta.rating.comment ? [[L.comment, meta.rating.comment]] : []).concat([
       [L.count, String(messages.length)],
-    ].map(function (r) { return '<tr><th>' + esc(r[0]) + '</th><td dir="auto">' + esc(r[1]) + '</td></tr>'; }).join('');
+    ]).map(function (r) { return '<tr><th>' + esc(r[0]) + '</th><td dir="auto">' + esc(r[1]) + '</td></tr>'; }).join('');
     return '<div class="ayba-doc">' +
       '<style>' +
       '.ayba-doc{width:' + PX_W + 'px;padding:28px 30px;box-sizing:border-box;background:#fff;color:#111;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Arabic","Noto Sans CJK SC",sans-serif}' +
@@ -88,6 +120,8 @@
       '.ayba-doc td{padding:5px 0;border-bottom:1px solid #eee}' +
       '.ayba-doc .m{border-left:4px solid #0f766e;background:#f5f7f7;padding:8px 12px;margin:0 0 9px}' +
       '.ayba-doc .m.c{border-color:#4f46e5;background:#f6f6fb}' +
+      '.ayba-doc .m.p{border-color:#b45309;background:#fdf8f0}' +
+      '.ayba-doc .hb{margin:14px 0;padding:10px 12px;border:2px dashed #b45309;background:#fff7ed;color:#7c2d12;font-weight:700;font-size:13px;border-radius:6px}' +
       '.ayba-doc .w{font-size:11px;font-weight:700;color:#444;margin-bottom:3px}' +
       '.ayba-doc .t{font-weight:600;margin-top:3px}' +
       '.ayba-doc .l{font-weight:400;color:#666;font-size:12px}' +
@@ -114,7 +148,7 @@
       var pxPerMm = canvas.width / contentW;
       var pageHpx = Math.floor(contentH * pxPerMm);
       // Mesaj kutularini ortadan bolmemek icin sayfa sinirlarini kutu araliklarina cek
-      var breaks = Array.prototype.map.call(node.querySelectorAll('.m, table'), function (el) {
+      var breaks = Array.prototype.map.call(node.querySelectorAll('.m, .hb, table'), function (el) {
         return Math.round((el.offsetTop + el.offsetHeight) * scale);
       });
       var y = 0;

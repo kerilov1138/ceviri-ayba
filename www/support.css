@@ -320,3 +320,178 @@ html.ayba-booting body::after {
 #aybaSoundBtn.off {
   opacity: 0.55;
 }
+
+/* Soru kutusu: konu ve "Soru sormak istiyorum" ayni yerde */
+.ayba-ask-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+.ayba-topic-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.ayba-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 70px;
+  font: inherit;
+  line-height: 1.45;
+}
+.ayba-ask-box .ayba-lang-hint {
+  margin: 0;
+}
+.ayba-ask-box .ayba-big {
+  align-self: flex-start;
+}
+.ayba-noadmin {
+  border: 1px solid var(--warn);
+  background: rgba(245, 158, 11, 0.12);
+  color: #fcd34d;
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+}
+.ayba-queue-info {
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.ayba-topic {
+  color: var(--text);
+  font-size: 0.88rem;
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+.ayba-item.transfer {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+/* Puan */
+.ayba-rate {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+}
+.ayba-rate .online-btn {
+  align-self: flex-start;
+}
+.ayba-stars {
+  display: flex;
+  gap: 4px;
+}
+.ayba-star {
+  background: none;
+  border: 0;
+  font-size: 2rem;
+  line-height: 1;
+  color: #52525b;
+  cursor: pointer;
+  padding: 2px;
+}
+.ayba-star.on {
+  color: #fbbf24;
+}
+.ayba-star:focus-visible {
+  outline: 2px solid var(--me);
+  border-radius: 6px;
+}
+
+/* Devretme */
+.ayba-transfer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ayba-transfer-pick {
+  text-align: left;
+}
+
+/* Hazir yanitlar (yalnizca yonetici, gorusmede) */
+.ayba-quick-wrap {
+  position: relative;
+  display: none;
+}
+html.ayba-admin[data-ayba-phase='call'] .ayba-quick-wrap {
+  display: flex;
+  align-items: center;
+}
+.ayba-quick-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+.ayba-quick-pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(360px, 80vw);
+  max-height: 50vh;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 8px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+.ayba-quick-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ayba-quick-item {
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+}
+.ayba-quick-item:hover {
+  border-color: var(--me);
+}
+.ayba-quick-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+.ayba-quick-edit textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 8px;
+  font: inherit;
+}
+.ayba-quick-edit-btns {
+  display: flex;
+  gap: 6px;
+}
+.ayba-quick-pop .ayba-link {
+  margin-top: 6px;
+}
+#aybaTransferBtn {
+  display: none;
+}
+html.ayba-admin[data-ayba-phase='call'] #aybaTransferBtn {
+  display: inline-flex;
+}

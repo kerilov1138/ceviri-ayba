@@ -146,7 +146,9 @@ ortak arşivinde de tutulsun isterseniz iki yol var:
 - Her görüşme bitince bu adrese `POST` (multipart/form-data, oturum çerezleriyle) gelir:
   - `pdf`: PDF dosyası
   - `meta`: JSON (start, end, adminName, adminId, customerName,
-    customerSurname, company, customerLang)
+    customerSurname, company, customerLang, topic, rating {stars, comment},
+    segments [{admin, from, to}] (devir varsa yöneticiler ve saatleri),
+    handedTo (bu yönetici görüşmeyi devrettiyse))
   - `messages`: JSON listesi (time, who, sourceLang, targetLang, original,
     translation)
 - Sunucu, isteği yalnızca **yönetici oturumundan** gelirse kabul etmeli.
@@ -192,6 +194,21 @@ verin:
 
 ## 8. Dil
 
-Arayüz 32 dilde. Canlı desteğe özgü yazılar Türkçe ve İngilizce; diğer
-dillerde İngilizce görünür. Yeni dil eklemek için `support-strings.js`
-dosyasına aynı anahtarlarla bir bölüm ekleyin.
+Arayüz 32 dilde, canlı desteğe özgü bütün yazılar dahil. İlk açılışta
+İngilizce başlar; kullanıcının seçtiği dil hatırlanır. Yazılar
+`support-strings.js` dosyasındadır.
+
+## 9. Özellikler (kısaca)
+
+- **Üye ekranı:** konu yazılmadan ve dil seçilmeden soru sorulamaz. Sırada
+  bekleyen, sıra numarasını ve tahmini bekleme süresini görür. Hiç yönetici
+  çevrimiçi değilse uyarı çıkar. Görüşme bitince 1–5 yıldız ve isteğe bağlı
+  yorumla puan verir.
+- **Yönetici ekranı:** yeni ziyaretçi ve sıraya girme için ekranda bildirim,
+  yüksek tonlu ses ve masaüstü bildirimi (tarayıcı izin isterse) çıkar.
+- **Hazır yanıtlar:** her yönetici kendi listesini düzenleyebilir; liste o
+  tarayıcıda saklanır.
+- **Devretme:** görüşme çevrimiçi başka bir yöneticiye devredilebilir.
+  Dökümde devir anı ayrı bir kutuyla gösterilir. Her iki yöneticiye de
+  kendi bölümünün dökümü iner.
+- **Döküm:** puan beklenir (en fazla 45 saniye), sonra PDF iner.

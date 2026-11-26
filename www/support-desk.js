@@ -63,6 +63,16 @@
     })();
   }
 
+  function cleanTransfer(x) {
+    return {
+      toId: clip(x.toId, 64),
+      toName: clip(x.toName, 80),
+      fromId: clip(x.fromId, 64),
+      fromName: clip(x.fromName, 80),
+      startAt: Number(x.startAt) || 0,
+    };
+  }
+
   function makeDedupe() {
     var seen = new Map();
     return function (mid) {
@@ -107,9 +117,13 @@
         code: clip(t.code, 32),
         token: clip(t.token, 64),
         at: Number(t.at) || Date.now(),
+        topic: clip(t.topic, 200),
+        transfer: t.transfer ? cleanTransfer(t.transfer) : null,
       });
       if (stopped) return;
-      var send = function () { publish({ k: 't', id: id, s: sealed }); };
+      // "at" acik yazilir: ziyaretciler sira numaralarini hesaplayabilsin (kimlik icermez)
+      var queuedAt = Number(t.at) || Date.now();
+      var send = function () { publish({ k: 't', id: id, at: queuedAt, tr: t.transfer ? 1 : 0, s: sealed }); };
       // Yeni baglanan yonetici "kim bekliyor" diye sorar: hemen yanitla
       var lastAsk = 0;
       unlisten = listen(pubsub, topic, function (text) {
@@ -155,6 +169,31 @@
     var topic = null;
     var timer = null;
     var unlisten = null;
+    var infoTimer = null;
+    var stats = new Map(); // yonetici (kimliksiz) -> { busy, avg, seen }
+    var queue = new Map(); // bekleyen kayit id -> { at, seen }
+    var gone = new Set();
+    // Ziyaretci ekrani icin: cevrimici yonetici sayisi, sira, tahmini bekleme
+    function info() {
+      if (typeof opts.onInfo !== 'function') return;
+      var now = Date.now();
+      stats.forEach(function (v, k) { if (now - v.seen > 13000) stats.delete(k); });
+      queue.forEach(function (v, k) { if (now - v.seen > TICKET_TTL_MS) queue.delete(k); });
+      var admins = 0, free = 0, avgSum = 0, avgN = 0;
+      stats.forEach(function (v) {
+        admins++;
+        if (!v.busy) free++;
+        if (v.avg > 0) { avgSum += v.avg; avgN++; }
+      });
+      opts.onInfo({
+        admins: admins,
+        free: free,
+        avgMs: avgN ? Math.round(avgSum / avgN) : 0,
+        queue: Array.from(queue.entries()).map(function (e) { return { id: e[0], at: e[1].at }; }),
+        ready: now - startedAt > 6000,
+      });
+    }
+    var startedAt = Date.now();
     var stopped = false;
     function publish(k) {
       if (topic) publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: k, id: id, mid: C.randomId() }));
@@ -166,11 +205,26 @@
       unlisten = listen(pubsub, topic, function (text) {
         var m;
         try { m = JSON.parse(text); } catch (e) { return; }
-        if (m && m.k === 'q' && Date.now() - lastAsk > 1000) {
+        if (!m || m.v !== 1) return;
+        if (m.k === 'q' && Date.now() - lastAsk > 1000) {
           lastAsk = Date.now();
           setTimeout(function () { publish('p'); }, Math.random() * 400);
+        } else if (m.k === 'st') {
+          stats.set(clip(m.a, 40), { busy: Boolean(m.busy), avg: Number(m.avg) || 0, seen: Date.now() });
+          info();
+        } else if (m.k === 't' && !m.tr) {
+          var tid = clip(m.id, 40);
+          if (!gone.has(tid)) {
+            queue.set(tid, { at: Number(m.at) || Date.now(), seen: Date.now() });
+            info();
+          }
+        } else if (m.k === 'x') {
+          var xid = clip(m.id, 40);
+          gone.add(xid);
+          if (queue.delete(xid)) info();
         }
       });
+      infoTimer = setInterval(info, 3000);
       publish('p');
       timer = setInterval(function () { publish('p'); }, PRESENCE_EVERY_MS);
     }
@@ -178,6 +232,7 @@
       if (stopped) return;
       stopped = true;
       clearInterval(timer);
+      clearInterval(infoTimer);
       publish('pl');
       if (unlisten) unlisten();
     }
@@ -206,6 +261,13 @@
     var timers = [];
     var changeQueued = false;
     var lastHere = 0;
+    var statId = C.randomId();
+    var durations = [];
+    function avgMs() {
+      if (!durations.length) return 0;
+      var last = durations.slice(-20);
+      return Math.round(last.reduce(function (a, b) { return a + b; }, 0) / last.length);
+    }
     var unlistenDesk = null;
 
     function changed() {
@@ -245,6 +307,8 @@
           code: clip(tk.code, 32),
           token: clip(tk.token, 64),
           at: Math.min(Number(tk.at) || Date.now(), Date.now()),
+          topic: clip(tk.topic, 200),
+          transfer: tk.transfer ? cleanTransfer(tk.transfer) : null,
           seen: Date.now(),
         });
         changed();
@@ -294,6 +358,14 @@
         return;
       }
       if (!msg || msg.v !== 1 || dedupe(msg.mid)) return;
+      if (msg.k === 'r' && msg.s) {
+        var rid = clip(msg.id, 40);
+        C.openSealed(keys.priv, msg.s).then(function (rt) {
+          var stars = Math.max(1, Math.min(5, Math.round(Number(rt.stars) || 0)));
+          if (typeof opts.onRating === 'function') opts.onRating(rid, { stars: stars, comment: clip(rt.comment, 500) });
+        }).catch(function () {});
+        return;
+      }
       if (msg.k === 'p') {
         var vid = clip(msg.id, 40);
         var isNew = vid && !visitors.has(vid);
@@ -354,6 +426,7 @@
         var win = claimWinner(x.id);
         w.push({
           id: x.id, name: x.name, surname: x.surname, company: x.company, lang: x.lang, at: x.at,
+          topic: x.topic, transfer: x.transfer,
           waitedMs: now - x.at,
           claimedBy: win && win.adminId !== me.id ? win.adminName : '',
         });
@@ -371,13 +444,29 @@
         if (!people.has(key)) people.set(key, a.name);
       });
       var names = Array.from(people.values());
-      return { waiting: w, sessions: s, adminsOnline: names.length, adminNames: names, visitorsOnline: visitors.size, visitorIds: Array.from(visitors.keys()) };
+      // Devretme icin: diger yoneticiler (kisi basina bir kayit)
+      var adminList = [];
+      var seenNames = new Set([me.name.toLocaleLowerCase()]);
+      admins.forEach(function (a, id) {
+        if (id === me.id || !a.name) return;
+        var key = a.name.toLocaleLowerCase();
+        if (seenNames.has(key)) return;
+        seenNames.add(key);
+        adminList.push({ id: id, name: a.name });
+      });
+      return { waiting: w, sessions: s, adminsOnline: names.length, adminNames: names, adminList: adminList, visitorsOnline: visitors.size, visitorIds: Array.from(visitors.keys()) };
     }
 
     async function start() {
       topic = await C.deskTopic(cfg);
       unlistenDesk = listen(pubsub, topic, onRaw);
-      var here = function () { sendDesk({ op: 'here', adminId: me.id, adminName: me.name }); };
+      var here = function () {
+        sendDesk({ op: 'here', adminId: me.id, adminName: me.name });
+        // Ziyaretciler icin (kimliksiz): cevrimici/musait yonetici ve ortalama gorusme suresi
+        if (topic && !stopped) {
+          publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: 'st', a: statId, busy: mySession ? 1 : 0, avg: avgMs(), mid: C.randomId() }));
+        }
+      };
       here();
       publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: 'q', mid: C.randomId() }));
       timers.push(setInterval(here, HERE_EVERY_MS));
@@ -422,6 +511,8 @@
     function endSession(silent) {
       if (!mySession) return;
       clearInterval(mySession.timer);
+      var took = Date.now() - mySession.info.since;
+      if (took > 15000) durations.push(took);
       var id = mySession.id;
       mySession = null;
       var msg = { op: 'end', id: id, adminId: me.id, adminName: me.name };
@@ -457,5 +548,23 @@
     };
   }
 
-  root.AybaDesk = { createMemberDesk: createMemberDesk, createMemberPresence: createMemberPresence, createAdminDesk: createAdminDesk };
+  /** Ziyaretci: gorusme sonrasi puani (yalnizca yoneticilerin acabilecegi bicimde) gonderir. */
+  async function sendRating(cfg, pubsub, ticketId, rating) {
+    var C = root.AybaCrypto;
+    var topic = await C.deskTopic(cfg);
+    var sealed = await C.sealForAdmins(cfg.adminPub, {
+      stars: Math.max(1, Math.min(5, Math.round(Number(rating.stars) || 0))),
+      comment: clip(rating.comment, 500),
+    });
+    var text = JSON.stringify({ v: 1, k: 'r', id: clip(ticketId, 40), s: sealed, mid: C.randomId() });
+    publishSoon(pubsub, topic, text);
+    setTimeout(function () { publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: 'r', id: clip(ticketId, 40), s: sealed, mid: C.randomId() })); }, 1500);
+  }
+
+  root.AybaDesk = {
+    createMemberDesk: createMemberDesk,
+    createMemberPresence: createMemberPresence,
+    createAdminDesk: createAdminDesk,
+    sendRating: sendRating,
+  };
 })(typeof window !== 'undefined' ? window : globalThis);
