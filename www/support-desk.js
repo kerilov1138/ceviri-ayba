@@ -30,6 +30,30 @@
     return String(s == null ? '' : s).replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, n);
   }
 
+  // Ayni cihazda masa konusunu birden fazla parca dinleyebilir (ziyaretci
+  // varligi + sira kaydi): tek abonelik, coklu dinleyici
+  var shared = new Map(); // topic -> { listeners: Set, pubsub }
+  function listen(pubsub, topic, fn) {
+    var entry = shared.get(topic);
+    if (!entry) {
+      entry = { listeners: new Set(), pubsub: pubsub };
+      shared.set(topic, entry);
+      pubsub.subscribe(topic, function (text) {
+        entry.listeners.forEach(function (l) {
+          try { l(text); } catch (e) { /* yoksay */ }
+        });
+      });
+    }
+    entry.listeners.add(fn);
+    return function () {
+      entry.listeners.delete(fn);
+      if (!entry.listeners.size) {
+        shared.delete(topic);
+        pubsub.unsubscribe(topic);
+      }
+    };
+  }
+
   function makeDedupe() {
     var seen = new Map();
     return function (mid) {
@@ -55,6 +79,7 @@
     var topic = null;
     var sealed = null;
     var stopped = false;
+    var unlisten = null;
 
     function publish(obj) {
       if (!topic) return;
@@ -78,7 +103,7 @@
       var send = function () { publish({ k: 't', id: id, s: sealed }); };
       // Yeni baglanan yonetici "kim bekliyor" diye sorar: hemen yanitla
       var lastAsk = 0;
-      pubsub.subscribe(topic, function (text) {
+      unlisten = listen(pubsub, topic, function (text) {
         var m;
         try { m = JSON.parse(text); } catch (e) { return; }
         if (m && m.k === 'q' && !stopped && Date.now() - lastAsk > 1000) {
@@ -97,10 +122,57 @@
       timer = null;
       publish({ k: 'x', id: id });
       var tp = topic;
-      setTimeout(function () { if (tp) { publish({ k: 'x', id: id }); pubsub.unsubscribe(tp); } }, 400);
+      setTimeout(function () {
+        if (tp) publish({ k: 'x', id: id });
+        if (unlisten) unlisten();
+      }, 400);
     }
 
     return { id: id, start: start, stop: stop };
+  }
+
+  var PRESENCE_EVERY_MS = 8000;
+  var PRESENCE_TTL_MS = 20000;
+
+  /**
+   * Ziyaretci: canli destek sayfasi acik oldugu surece "cevrimici" bilgisi
+   * yayinlar (kimlik icermez; yalnizca rastgele bir sekme kimligi).
+   */
+  function createMemberPresence(opts) {
+    var C = root.AybaCrypto;
+    var cfg = opts.config;
+    var pubsub = opts.pubsub;
+    var id = C.randomId();
+    var topic = null;
+    var timer = null;
+    var unlisten = null;
+    var stopped = false;
+    function publish(k) {
+      if (topic) pubsub.publish(topic, JSON.stringify({ v: 1, k: k, id: id, mid: C.randomId() }));
+    }
+    async function start() {
+      topic = await C.deskTopic(cfg);
+      if (stopped) return;
+      var lastAsk = 0;
+      unlisten = listen(pubsub, topic, function (text) {
+        var m;
+        try { m = JSON.parse(text); } catch (e) { return; }
+        if (m && m.k === 'q' && Date.now() - lastAsk > 1000) {
+          lastAsk = Date.now();
+          setTimeout(function () { publish('p'); }, Math.random() * 400);
+        }
+      });
+      publish('p');
+      timer = setInterval(function () { publish('p'); }, PRESENCE_EVERY_MS);
+    }
+    function stop() {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timer);
+      publish('pl');
+      if (unlisten) unlisten();
+    }
+    return { start: start, stop: stop };
   }
 
   /** Yonetici tarafi: sirayi, suren gorusmeleri ve diger yoneticileri izler. */
@@ -118,12 +190,14 @@
     var sessions = new Map(); // ticket id -> { id, adminId, adminName, name, surname, company, since, seen }
     var claims = new Map(); // ticket id -> [{ adminId, adminName, at, seen }]
     var admins = new Map(); // admin id -> { name, seen }
+    var visitors = new Map(); // ziyaretci sekme id -> son gorulme
     var gone = new Map(); // iptal edilen/biten kayitlar: id -> zaman (gec gelen tekrar listeye girmesin)
     var mySession = null; // { id, info, timer }
     var topic = null;
     var timers = [];
     var changeQueued = false;
     var lastHere = 0;
+    var unlistenDesk = null;
 
     function changed() {
       if (changeQueued) return;
@@ -172,6 +246,11 @@
       var now = Date.now();
       var id = clip(d.id, 40);
       var adminId = clip(d.adminId, 64);
+      if (d.op === 'bye') {
+        if (adminId && adminId !== me.id) admins.delete(adminId);
+        changed();
+        return;
+      }
       if (adminId) admins.set(adminId, { name: clip(d.adminName, 80), seen: now });
       if (d.op === 'claim' && id) {
         var list = (claims.get(id) || []).filter(function (c) { return c.adminId !== adminId; });
@@ -205,6 +284,17 @@
         return;
       }
       if (!msg || msg.v !== 1 || dedupe(msg.mid)) return;
+      if (msg.k === 'p') {
+        var vid = clip(msg.id, 40);
+        var isNew = vid && !visitors.has(vid);
+        if (vid) visitors.set(vid, Date.now());
+        if (isNew) changed();
+        return;
+      }
+      if (msg.k === 'pl') {
+        if (visitors.delete(clip(msg.id, 40))) changed();
+        return;
+      }
       if (msg.k === 't') onTicket(msg);
       else if (msg.k === 'q') {
         // Yeni baglanan yonetici: kendini hemen bildir (cevrimici sayisi icin)
@@ -231,6 +321,7 @@
         if (now - s.seen > SESSION_TTL_MS) { sessions.delete(id); dirty = true; }
       });
       admins.forEach(function (a, id) { if (now - a.seen > HERE_TTL_MS) { admins.delete(id); dirty = true; } });
+      visitors.forEach(function (t, id) { if (now - t > PRESENCE_TTL_MS) { visitors.delete(id); dirty = true; } });
       claims.forEach(function (list, id) {
         var keep = list.filter(function (c) { return now - c.seen < CLAIM_TTL_MS; });
         if (keep.length) claims.set(id, keep); else claims.delete(id);
@@ -263,12 +354,12 @@
       s.sort(function (a, b) { return a.since - b.since; });
       var others = 0;
       admins.forEach(function (a, id) { if (id !== me.id) others++; });
-      return { waiting: w, sessions: s, adminsOnline: others + 1 };
+      return { waiting: w, sessions: s, adminsOnline: others + 1, visitorsOnline: visitors.size };
     }
 
     async function start() {
       topic = await C.deskTopic(cfg);
-      pubsub.subscribe(topic, onRaw);
+      unlistenDesk = listen(pubsub, topic, onRaw);
       var here = function () { sendDesk({ op: 'here', adminId: me.id, adminName: me.name }); };
       here();
       pubsub.publish(topic, JSON.stringify({ v: 1, k: 'q', mid: C.randomId() }));
@@ -331,9 +422,10 @@
 
     function stop() {
       endSession();
+      sendDesk({ op: 'bye', adminId: me.id, adminName: me.name });
       timers.forEach(clearInterval);
       timers = [];
-      if (topic) pubsub.unsubscribe(topic);
+      if (unlistenDesk) unlistenDesk();
     }
 
     return {
@@ -347,5 +439,5 @@
     };
   }
 
-  root.AybaDesk = { createMemberDesk: createMemberDesk, createAdminDesk: createAdminDesk };
+  root.AybaDesk = { createMemberDesk: createMemberDesk, createMemberPresence: createMemberPresence, createAdminDesk: createAdminDesk };
 })(typeof window !== 'undefined' ? window : globalThis);

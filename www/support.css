@@ -279,3 +279,8 @@ html.ayba .online-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
+.ayba-online {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}

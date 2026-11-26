@@ -204,6 +204,12 @@
 
   function initMember() {
     initMemberLang();
+    // Yoneticiler cevrimici ziyaretci sayisini gorur (yalnizca ziyaretciler sayilir)
+    if (cfg.adminPub) {
+      var presence = window.AybaDesk.createMemberPresence({ config: cfg, pubsub: pubsub() });
+      presence.start();
+      window.addEventListener('pagehide', function () { presence.stop(); });
+    }
     $('aybaAskBtn').addEventListener('click', memberAsk);
     $('aybaCancelBtn').addEventListener('click', function () {
       memberStopDesk();
@@ -271,7 +277,7 @@
     return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
   }
 
-  var lastSnap = { waiting: [], sessions: [], adminsOnline: 1 };
+  var lastSnap = { waiting: [], sessions: [], adminsOnline: 1, visitorsOnline: 0 };
   function renderConsole(snap) {
     if (snap) lastSnap = snap;
     snap = lastSnap;
@@ -283,6 +289,7 @@
     $('aybaWaitCount').textContent = String(snap.waiting.length);
     $('aybaSessionCount').textContent = String(snap.sessions.length);
     $('aybaAdminsOnline').textContent = t('ayba.adminsOnline', { n: snap.adminsOnline });
+    $('aybaVisitorsOnline').textContent = t('ayba.visitorsOnline', { n: snap.visitorsOnline || 0 });
 
     var wl = $('aybaWaitList');
     wl.textContent = '';
@@ -376,6 +383,7 @@
       onChange: renderConsole,
     });
     await admin.desk.start();
+    window.addEventListener('pagehide', function () { if (admin.desk) admin.desk.stop(); });
     adminPhase('console');
     renderConsole();
     setInterval(function () { if (admin.phase === 'console') renderConsole(); }, 1000);

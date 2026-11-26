@@ -36,6 +36,14 @@ function bus() {
   assert.deepEqual(s1.waiting.map((w) => w.company), ['ACME Ltd', 'Beta AS']); // once gelen once
   assert.equal(s1.adminsOnline, 2);
   assert.ok(!sx || sx.waiting.length === 0, 'baska kurulumun yoneticisi sirayi goremez');
+  // Cevrimici sayilari: yoneticiler ve ziyaretciler ayri sayilir
+  const v1 = D.createMemberPresence({ config: cfg, pubsub: mk() });
+  const v2 = D.createMemberPresence({ config: cfg, pubsub: mk() });
+  await v1.start(); await v2.start(); await sleep(300);
+  assert.equal(s1.visitorsOnline, 2, 'iki ziyaretci'); assert.equal(s1.adminsOnline, 2, 'yoneticiler ziyaretci sayilmaz');
+  v2.stop(); await sleep(300);
+  assert.equal(s1.visitorsOnline, 1, 'ayrilan ziyaretci duser');
+  console.log('ok cevrimici yonetici ve ziyaretci sayilari ayri');
   console.log('ok sira listesi (firma adlariyla), baska kurulum goremez');
   // Ayni anda ustlenme: yalnizca biri kazanir
   const [r1, r2] = await Promise.all([a1.claim(m1.id), a2.claim(m1.id)]);
@@ -67,7 +75,10 @@ function bus() {
   m2.stop(); await sleep(300);
   assert.equal(s1.waiting.length, 0);
   console.log('ok gorusme bitti / uye ayrildi');
-  [a1, a2, ax].forEach((a) => a.stop());
+  a2.stop(); await sleep(300);
+  assert.equal(s1.adminsOnline, 1, 'ayrilan yonetici duser');
+  v1.stop();
+  [a1, ax].forEach((a) => a.stop());
   console.log('ALL DESK TESTS PASS');
   process.exit(0);
 })().catch((e) => { console.error(e); process.exit(1); });
