@@ -284,3 +284,39 @@ html.ayba .online-btn:disabled {
   flex-direction: column;
   gap: 2px;
 }
+/* Acilista eski/genel ekran bir an bile gorunmesin */
+html.ayba-booting .app-shell {
+  visibility: hidden;
+}
+html.ayba-booting body::after {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.16);
+  border-top-color: #10b981;
+  animation: ayba-spin 1s linear infinite;
+}
+/* Yoneticiye bir kez gorunen bildirim */
+.ayba-toast {
+  position: fixed;
+  z-index: 60;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(460px, calc(100% - 24px));
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #0f2e24;
+  border: 1px solid var(--me);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+#aybaSoundBtn.off {
+  opacity: 0.55;
+}

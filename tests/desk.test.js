@@ -35,6 +35,7 @@ function bus() {
   assert.equal(s1.waiting.length, 2); assert.equal(s2.waiting.length, 2);
   assert.deepEqual(s1.waiting.map((w) => w.company), ['ACME Ltd', 'Beta AS']); // once gelen once
   assert.equal(s1.adminsOnline, 2);
+  assert.deepEqual([...s1.adminNames].sort(), ['Ayse Yonetici', 'Mehmet Yonetici']);
   assert.ok(!sx || sx.waiting.length === 0, 'baska kurulumun yoneticisi sirayi goremez');
   // Cevrimici sayilari: yoneticiler ve ziyaretciler ayri sayilir
   const v1 = D.createMemberPresence({ config: cfg, pubsub: mk() });
@@ -75,6 +76,11 @@ function bus() {
   m2.stop(); await sleep(300);
   assert.equal(s1.waiting.length, 0);
   console.log('ok gorusme bitti / uye ayrildi');
+  // Ayni yonetici ikinci sekmede: yine tek kisi sayilir
+  const a1b = D.createAdminDesk({ config: cfg, pubsub: mk(), keys: keys1, me: { id: 'adm1-tab2', name: 'Ayse Yonetici' }, onChange: () => {} });
+  await a1b.start(); await sleep(300);
+  assert.equal(s2.adminsOnline, 2, 'ayni kisi iki sekmede tek sayilir');
+  a1b.stop();
   a2.stop(); await sleep(300);
   assert.equal(s1.adminsOnline, 1, 'ayrilan yonetici duser');
   v1.stop();

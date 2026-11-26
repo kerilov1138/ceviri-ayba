@@ -206,7 +206,18 @@
     initMemberLang();
     // Yoneticiler cevrimici ziyaretci sayisini gorur (yalnizca ziyaretciler sayilir)
     if (cfg.adminPub) {
-      var presence = window.AybaDesk.createMemberPresence({ config: cfg, pubsub: pubsub() });
+      var pid = null;
+      try {
+        pid = sessionStorage.getItem('ayba_presence_id');
+        if (!pid) {
+          pid = window.AybaCrypto.randomId();
+          sessionStorage.setItem('ayba_presence_id', pid);
+        }
+      } catch (e) {
+        pid = null;
+      }
+      // Ayni sekmede sayfa yenilenince "yeni ziyaretci" sayilmaz
+      var presence = window.AybaDesk.createMemberPresence({ config: cfg, pubsub: pubsub(), id: pid || undefined });
       presence.start();
       window.addEventListener('pagehide', function () { presence.stop(); });
     }
@@ -223,7 +234,7 @@
   // -------------------------------------------------------------------------
   // Yonetici
   // -------------------------------------------------------------------------
-  var admin = { desk: null, keys: null, phase: 'locked', ticket: null, start: 0, joinTimer: null, partnerSeen: false, known: new Set(), docs: [], sound: true, finishing: false };
+  var admin = { desk: null, keys: null, phase: 'locked', ticket: null, start: 0, joinTimer: null, partnerSeen: false, known: new Set(), knownVisitors: new Set(), unlockedAt: 0, docs: [], sound: true, finishing: false };
   var PW_KEY = 'ayba_admin_pw';
 
   function adminId() {
@@ -250,26 +261,57 @@
     $('aybaCallStatus').textContent = p === 'joining' ? t('ayba.joining') : '';
   }
 
+  // Ses: tarayici sesi ancak bir dokunustan sonra calar; ilk dokunusta hazirlanir
   var audioCtx = null;
-  function beep() {
-    if (!admin.sound) return;
+  function audio() {
     try {
       audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-      var now = audioCtx.currentTime;
-      [0, 0.18].forEach(function (d, i) {
-        var o = audioCtx.createOscillator();
-        var g = audioCtx.createGain();
-        o.frequency.value = i ? 1046 : 784;
-        g.gain.setValueAtTime(0.0001, now + d);
-        g.gain.exponentialRampToValueAtTime(0.25, now + d + 0.02);
-        g.gain.exponentialRampToValueAtTime(0.0001, now + d + 0.16);
-        o.connect(g).connect(audioCtx.destination);
-        o.start(now + d);
-        o.stop(now + d + 0.18);
-      });
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch (e) {
-      /* ses yok */
+      audioCtx = null;
     }
+    return audioCtx;
+  }
+  function tones(list, peak) {
+    if (!admin.sound) return;
+    var ctx = audio();
+    if (!ctx) return;
+    var now = ctx.currentTime + 0.02;
+    list.forEach(function (tn) {
+      var o = ctx.createOscillator();
+      var g = ctx.createGain();
+      o.type = tn.type || 'sine';
+      o.frequency.value = tn.f;
+      g.gain.setValueAtTime(0.0001, now + tn.at);
+      g.gain.exponentialRampToValueAtTime(peak, now + tn.at + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + tn.at + tn.len);
+      o.connect(g).connect(ctx.destination);
+      o.start(now + tn.at);
+      o.stop(now + tn.at + tn.len + 0.02);
+    });
+  }
+  // Siraya giren: iki tonlu
+  function beep() {
+    tones([{ f: 784, at: 0, len: 0.16 }, { f: 1046, at: 0.18, len: 0.16 }], 0.3);
+  }
+  // Yeni ziyaretci: farkli ve yuksek tonlu, uc vuruslu
+  function visitorChime() {
+    tones([
+      { f: 1568, at: 0, len: 0.12, type: 'triangle' },
+      { f: 2093, at: 0.14, len: 0.12, type: 'triangle' },
+      { f: 2637, at: 0.28, len: 0.22, type: 'triangle' },
+    ], 0.45);
+  }
+
+  // Ekranda bir kez gorunen bildirim
+  var toastTimer = null;
+  function toast(text) {
+    var el = $('aybaToast');
+    if (!el) return;
+    el.textContent = text;
+    el.classList.remove('hidden');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.add('hidden'); }, 6000);
   }
 
   function mmss(ms) {
@@ -283,12 +325,25 @@
     snap = lastSnap;
     var fresh = snap.waiting.filter(function (w) { return !admin.known.has(w.id); });
     snap.waiting.forEach(function (w) { admin.known.add(w.id); });
-    if (fresh.length && admin.phase === 'console') beep();
+    if (fresh.length && admin.phase === 'console') {
+      beep();
+      toast(t('ayba.newTicket', { company: fresh[0].company || (fresh[0].name + ' ' + fresh[0].surname).trim() }));
+    }
+    // Yeni ziyaretci: her ziyaretci icin bir kez (yonetici giris yaptigi anda
+    // zaten sayfada olanlar icin bildirim yok)
+    var settling = Date.now() - admin.unlockedAt < 3000;
+    var newVisitors = (snap.visitorIds || []).filter(function (id) { return !admin.knownVisitors.has(id); });
+    newVisitors.forEach(function (id) { admin.knownVisitors.add(id); });
+    if (newVisitors.length && !settling && admin.phase === 'console' && !fresh.length) {
+      visitorChime();
+      toast(t('ayba.newVisitor'));
+    }
     document.title = (snap.waiting.length ? '(' + snap.waiting.length + ') ' : '') + t('ayba.title');
 
     $('aybaWaitCount').textContent = String(snap.waiting.length);
     $('aybaSessionCount').textContent = String(snap.sessions.length);
-    $('aybaAdminsOnline').textContent = t('ayba.adminsOnline', { n: snap.adminsOnline });
+    $('aybaAdminsOnline').textContent = t('ayba.adminsOnline', { n: snap.adminsOnline }) +
+      (snap.adminNames && snap.adminNames.length ? ' (' + snap.adminNames.join(', ') + ')' : '');
     $('aybaVisitorsOnline').textContent = t('ayba.visitorsOnline', { n: snap.visitorsOnline || 0 });
 
     var wl = $('aybaWaitList');
@@ -375,6 +430,7 @@
     }
     try { sessionStorage.setItem(PW_KEY, pw); } catch (e) { /* yoksay */ }
     msg.textContent = '';
+    admin.unlockedAt = Date.now();
     admin.desk = window.AybaDesk.createAdminDesk({
       config: cfg,
       pubsub: pubsub(),
@@ -541,8 +597,13 @@
     leaveBtn.removeAttribute('data-i18n');
     leaveBtn.textContent = t('ayba.end');
     adminPhase('locked');
+    $('aybaToast').addEventListener('click', function () { $('aybaToast').classList.add('hidden'); });
+    // Ses ilk dokunusta hazirlanir (tarayici kurali)
+    document.addEventListener('pointerdown', audio, { capture: true });
+    document.addEventListener('keydown', audio, { capture: true });
     $('aybaUnlock').addEventListener('submit', function (e) {
       e.preventDefault();
+      audio();
       adminUnlock($('aybaPassword').value);
     });
     $('aybaEndBtn').addEventListener('click', function () {
@@ -553,7 +614,8 @@
       admin.sound = !admin.sound;
       $('aybaSoundBtn').textContent = admin.sound ? '🔔' : '🔕';
       $('aybaSoundBtn').setAttribute('aria-pressed', String(admin.sound));
-      if (admin.sound) beep();
+      $('aybaSoundBtn').classList.toggle('off', !admin.sound);
+      if (admin.sound) visitorChime();
     });
     var saved = null;
     try { saved = sessionStorage.getItem(PW_KEY); } catch (e) { /* yoksay */ }
@@ -567,6 +629,7 @@
     document.title = t('ayba.title');
     if (window.AYBA_NEEDS_LOGIN) {
       renderLogin();
+      ready();
       return;
     }
     renderWho();
@@ -577,6 +640,12 @@
     };
     if (user.role === 'admin') initAdmin();
     else initMember();
+    ready();
+  }
+
+  // Uygulama ve yazilar hazir: sayfayi goster
+  function ready() {
+    requestAnimationFrame(function () { document.documentElement.classList.remove('ayba-booting'); });
   }
 
   if (window.AybaApp) start();

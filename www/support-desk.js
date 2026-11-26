@@ -21,8 +21,8 @@
   var TICKET_TTL_MS = 13000;
   var SESSION_EVERY_MS = 4000;
   var SESSION_TTL_MS = 15000;
-  var HERE_EVERY_MS = 8000;
-  var HERE_TTL_MS = 20000;
+  var HERE_EVERY_MS = 5000;
+  var HERE_TTL_MS = 12000;
   var CLAIM_WAIT_MS = 900;
   var CLAIM_TTL_MS = 12000;
 
@@ -52,6 +52,15 @@
         pubsub.unsubscribe(topic);
       }
     };
+  }
+
+  // Araci baglantisi henuz kurulmadiysa ilk mesaj kaybolmasin: baglaninca gonder
+  function publishSoon(pubsub, topic, text) {
+    var tries = 0;
+    (function attempt() {
+      var sent = pubsub.publish(topic, text);
+      if (!sent && ++tries < 40) setTimeout(attempt, 500);
+    })();
   }
 
   function makeDedupe() {
@@ -85,7 +94,7 @@
       if (!topic) return;
       obj.v = 1;
       obj.mid = C.randomId();
-      pubsub.publish(topic, JSON.stringify(obj));
+      publishSoon(pubsub, topic, JSON.stringify(obj));
     }
 
     async function start() {
@@ -142,13 +151,13 @@
     var C = root.AybaCrypto;
     var cfg = opts.config;
     var pubsub = opts.pubsub;
-    var id = C.randomId();
+    var id = opts.id || C.randomId();
     var topic = null;
     var timer = null;
     var unlisten = null;
     var stopped = false;
     function publish(k) {
-      if (topic) pubsub.publish(topic, JSON.stringify({ v: 1, k: k, id: id, mid: C.randomId() }));
+      if (topic) publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: k, id: id, mid: C.randomId() }));
     }
     async function start() {
       topic = await C.deskTopic(cfg);
@@ -208,10 +217,11 @@
       });
     }
 
+    var stopped = false;
     async function sendDesk(payload) {
-      if (!topic) return;
+      if (!topic || (stopped && payload.op !== 'bye')) return;
       var blob = await C.deskEncrypt(keys.deskKey, payload);
-      pubsub.publish(topic, JSON.stringify({ v: 1, k: 'a', mid: C.randomId(), iv: blob.iv, ct: blob.ct }));
+      publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: 'a', mid: C.randomId(), iv: blob.iv, ct: blob.ct }));
     }
 
     async function onTicket(msg) {
@@ -352,9 +362,16 @@
       var s = [];
       sessions.forEach(function (x) { s.push(Object.assign({ mine: x.adminId === me.id }, x)); });
       s.sort(function (a, b) { return a.since - b.since; });
-      var others = 0;
-      admins.forEach(function (a, id) { if (id !== me.id) others++; });
-      return { waiting: w, sessions: s, adminsOnline: others + 1, visitorsOnline: visitors.size };
+      // Cevrimici yoneticiler: parolayla girmis kisiler (ayni kisi iki sekmede tek sayilir)
+      var people = new Map();
+      people.set(me.name.toLocaleLowerCase(), me.name);
+      admins.forEach(function (a, id) {
+        if (id === me.id || !a.name) return;
+        var key = a.name.toLocaleLowerCase();
+        if (!people.has(key)) people.set(key, a.name);
+      });
+      var names = Array.from(people.values());
+      return { waiting: w, sessions: s, adminsOnline: names.length, adminNames: names, visitorsOnline: visitors.size, visitorIds: Array.from(visitors.keys()) };
     }
 
     async function start() {
@@ -362,7 +379,7 @@
       unlistenDesk = listen(pubsub, topic, onRaw);
       var here = function () { sendDesk({ op: 'here', adminId: me.id, adminName: me.name }); };
       here();
-      pubsub.publish(topic, JSON.stringify({ v: 1, k: 'q', mid: C.randomId() }));
+      publishSoon(pubsub, topic, JSON.stringify({ v: 1, k: 'q', mid: C.randomId() }));
       timers.push(setInterval(here, HERE_EVERY_MS));
       timers.push(setInterval(prune, 1500));
       changed();
@@ -422,6 +439,7 @@
 
     function stop() {
       endSession();
+      stopped = true;
       sendDesk({ op: 'bye', adminId: me.id, adminName: me.name });
       timers.forEach(clearInterval);
       timers = [];

@@ -10,14 +10,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="icon" href="icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="icon.svg" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="support.css" />
+  <link rel="stylesheet" href="styles.css?v=__V__" />
+  <link rel="stylesheet" href="support.css?v=__V__" />
   <!-- Canli destek: yonetici anahtari (arac/yonetici-anahtari.html ile uretilir) -->
-  <script src="support-config.js"></script>
+  <script src="support-config.js?v=__V__"></script>
   <!-- Sitenin giris yapmis kullanicisi: window.AYBA_USER burada (support-boot.js'ten ONCE) tanimlanir.
        Ayrintilar: GELISTIRICI-KURULUM.md -->
   <script src="support-user.js" onerror="void 0"></script>
-  <script src="support-boot.js"></script>
+  <script src="support-boot.js?v=__V__"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -75,6 +75,7 @@
       <button id="alertCloseBtn" class="alert-close" aria-label="Kapat" data-i18n-attr="aria-label:btn.close">&times;</button>
     </div>
 
+    <div id="aybaToast" class="ayba-toast hidden" role="status" aria-live="assertive"></div>
     <!-- Canli destek paneli (uye / yonetici) -->
     <section id="aybaPanel" class="ayba-panel" aria-live="polite">
       <div class="ayba-who-row">
@@ -471,16 +472,16 @@
     </div>
   </div>
 
-  <script src="web-url.js"></script>
-  <script src="mqtt.min.js"></script>
-  <script src="online-relay.js"></script>
-  <script src="android-shim.js"></script>
-  <script src="support-crypto.js"></script>
-  <script src="support-desk.js"></script>
-  <script src="lib/html2canvas.min.js"></script>
-  <script src="lib/jspdf.umd.min.js"></script>
-  <script src="support-transcript.js"></script>
-  <script src="support-ui.js"></script>
-  <script type="module" src="app.js"></script>
+  <script src="web-url.js?v=__V__"></script>
+  <script src="mqtt.min.js?v=__V__"></script>
+  <script src="online-relay.js?v=__V__"></script>
+  <script src="android-shim.js?v=__V__"></script>
+  <script src="support-crypto.js?v=__V__"></script>
+  <script src="support-desk.js?v=__V__"></script>
+  <script src="lib/html2canvas.min.js?v=__V__"></script>
+  <script src="lib/jspdf.umd.min.js?v=__V__"></script>
+  <script src="support-transcript.js?v=__V__"></script>
+  <script src="support-ui.js?v=__V__"></script>
+  <script type="module" src="app.js?v=__V__"></script>
 </body>
 </html>

@@ -48,6 +48,7 @@ jobs:
         run: |
           npm run copy-core
           node scripts/write-web-url.js
+          sed -i "s/__V__/${GITHUB_SHA::7}/g" www/index.html
           touch www/.nojekyll
       - name: GitHub Pages ayarla
         uses: actions/configure-pages@v5
@@ -75,6 +76,7 @@ jobs:
       - name: Siteye yuklenecek paketi hazirla
         run: |
           npm run copy-core
+          sed -i "s/__V__/${GITHUB_SHA::7}/g" www/index.html
           mkdir -p out/canli-destek
           cp -r www/. out/canli-destek/
           cp -r arac out/

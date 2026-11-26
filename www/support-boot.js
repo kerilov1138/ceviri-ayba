@@ -44,6 +44,14 @@
   window.AYBA_ROLE = user ? user.role : 'member';
   window.AYBA_NEEDS_LOGIN = !user;
 
+  // Ilk boyamadan once dogru ekran: CEVIRI'nin genel parcalari ve varsayilan
+  // yazilar bir an bile gorunmesin (uygulama hazir olunca acilir)
+  var html = document.documentElement;
+  html.classList.add('ayba', 'ayba-' + window.AYBA_ROLE, 'ayba-booting');
+  if (!user) html.classList.add('ayba-login');
+  html.dataset.aybaPhase = user ? (user.role === 'admin' ? 'locked' : 'idle') : 'login';
+  setTimeout(function () { html.classList.remove('ayba-booting'); }, 6000);
+
   window.AybaIdentity = {
     user: user,
     testLoginAllowed: cfg.testLogin === true,
