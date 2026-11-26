@@ -21,8 +21,8 @@ html.ayba .native-only {
   display: none !important;
 }
 
-/* Musteri dokum alamaz: yalnizca yoneticiler */
-html.ayba-member #exportBtn {
+/* Elle dokum indirme yok: gorusme bitince yoneticide PDF otomatik iner */
+html.ayba #exportBtn {
   display: none !important;
 }
 

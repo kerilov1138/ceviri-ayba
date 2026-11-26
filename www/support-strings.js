@@ -135,6 +135,11 @@ const SUPPORT_STRINGS = {
   },
 };
 
+// Ayarlar penceresi basligi: canli destek (diger dillerde Ingilizce)
+for (const lang of Object.keys(STRINGS)) {
+  STRINGS[lang]['settings.title'] = lang === 'tr' ? 'Canlı Destek Ayarları' : 'Live Support Settings';
+}
+
 for (const [lang, dict] of Object.entries(SUPPORT_STRINGS)) {
   STRINGS[lang] = Object.assign(STRINGS[lang] || {}, dict);
 }

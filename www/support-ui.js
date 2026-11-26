@@ -326,7 +326,7 @@
     var fresh = snap.waiting.filter(function (w) { return !admin.known.has(w.id); });
     snap.waiting.forEach(function (w) { admin.known.add(w.id); });
     if (fresh.length && admin.phase === 'console') {
-      beep();
+      visitorChime();
       toast(t('ayba.newTicket', { company: fresh[0].company || (fresh[0].name + ' ' + fresh[0].surname).trim() }));
     }
     // Yeni ziyaretci: her ziyaretci icin bir kez (yonetici giris yaptigi anda

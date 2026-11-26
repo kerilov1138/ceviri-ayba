@@ -279,7 +279,6 @@ const els = {
   attachInput: document.getElementById('attachInput'),
   exportBtn: document.getElementById('exportBtn'),
   exportModal: document.getElementById('exportModal'),
-  autoDetectToggle: document.getElementById('autoDetectToggle'),
   keepAwakeToggle: document.getElementById('keepAwakeToggle'),
   headsetButtonToggle: document.getElementById('headsetButtonToggle'),
   clearBtn: document.getElementById('clearBtn'),
@@ -287,7 +286,6 @@ const els = {
   settingsModal: document.getElementById('settingsModal'),
   closeSettingsBtn: document.getElementById('closeSettingsBtn'),
   autoSpeakToggle: document.getElementById('autoSpeakToggle'),
-  flipPartnerToggle: document.getElementById('flipPartnerToggle'),
   speechRateRange: document.getElementById('speechRateRange'),
   rateValueLabel: document.getElementById('rateValueLabel'),
 };
@@ -3162,7 +3160,6 @@ function bindEvents() {
   });
 
   els.autoSpeakToggle.checked = state.settings.autoSpeak;
-  els.flipPartnerToggle.checked = state.settings.flipPartner;
   els.speechRateRange.value = String(state.settings.speechRate);
   els.rateValueLabel.textContent = `${state.settings.speechRate.toFixed(2).replace(/\.00$/, '.0')}x`;
   els.facePartnerCard.classList.toggle('flipped', state.settings.flipPartner);
@@ -3172,13 +3169,8 @@ function bindEvents() {
     saveSettings();
   });
 
-  els.autoDetectToggle.checked = state.settings.autoDetect;
   els.keepAwakeToggle.checked = state.settings.keepAwake;
   els.headsetButtonToggle.checked = state.settings.headsetButton;
-  els.autoDetectToggle.addEventListener('change', (e) => {
-    state.settings.autoDetect = e.target.checked;
-    saveSettings();
-  });
   els.keepAwakeToggle.addEventListener('change', (e) => {
     state.settings.keepAwake = e.target.checked;
     saveSettings();
@@ -3188,12 +3180,6 @@ function bindEvents() {
     state.settings.headsetButton = e.target.checked;
     saveSettings();
     updateMediaButtons();
-  });
-
-  els.flipPartnerToggle.addEventListener('change', (e) => {
-    state.settings.flipPartner = e.target.checked;
-    els.facePartnerCard.classList.toggle('flipped', state.settings.flipPartner);
-    saveSettings();
   });
 
   els.speechRateRange.addEventListener('input', (e) => {
