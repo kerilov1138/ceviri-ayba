@@ -287,7 +287,6 @@ const els = {
   settingsModal: document.getElementById('settingsModal'),
   closeSettingsBtn: document.getElementById('closeSettingsBtn'),
   autoSpeakToggle: document.getElementById('autoSpeakToggle'),
-  autoLoopToggle: document.getElementById('autoLoopToggle'),
   flipPartnerToggle: document.getElementById('flipPartnerToggle'),
   speechRateRange: document.getElementById('speechRateRange'),
   rateValueLabel: document.getElementById('rateValueLabel'),
@@ -3163,7 +3162,6 @@ function bindEvents() {
   });
 
   els.autoSpeakToggle.checked = state.settings.autoSpeak;
-  els.autoLoopToggle.checked = state.settings.autoLoop;
   els.flipPartnerToggle.checked = state.settings.flipPartner;
   els.speechRateRange.value = String(state.settings.speechRate);
   els.rateValueLabel.textContent = `${state.settings.speechRate.toFixed(2).replace(/\.00$/, '.0')}x`;
@@ -3171,11 +3169,6 @@ function bindEvents() {
 
   els.autoSpeakToggle.addEventListener('change', (e) => {
     state.settings.autoSpeak = e.target.checked;
-    saveSettings();
-  });
-
-  els.autoLoopToggle.addEventListener('change', (e) => {
-    state.settings.autoLoop = e.target.checked;
     saveSettings();
   });
 

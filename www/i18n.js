@@ -63,7 +63,20 @@ export function toUiLang(code) {
   return UI_LANGS.some((l) => l.code === base) ? base : null;
 }
 
+// CEVIRI_AYBARION canli destek: kendi secimi ayri saklanir; ilk acilista Ingilizce
+const AYBA = typeof window !== 'undefined' && Boolean(window.AYBA_ROLE);
+const UI_KEY = AYBA ? 'ayba_ui_lang' : STORAGE_KEY;
+
 function detectInitial() {
+  if (AYBA) {
+    try {
+      const saved = localStorage.getItem(UI_KEY);
+      if (saved && STRINGS[saved]) return saved;
+    } catch {
+      // localStorage yoksa yoksay
+    }
+    return 'en';
+  }
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && STRINGS[saved]) return saved;
@@ -144,7 +157,7 @@ export function setUiLang(code) {
   if (!STRINGS[code]) return;
   current = code;
   try {
-    localStorage.setItem(STORAGE_KEY, code);
+    localStorage.setItem(UI_KEY, code);
   } catch {
     // yoksay
   }
