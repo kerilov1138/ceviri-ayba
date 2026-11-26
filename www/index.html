@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>AYBARION Canlı Destek</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="support.css" />
+  <!-- Canli destek: yonetici anahtari (arac/yonetici-anahtari.html ile uretilir) -->
+  <script src="support-config.js"></script>
+  <!-- Sitenin giris yapmis kullanicisi: window.AYBA_USER burada (support-boot.js'ten ONCE) tanimlanir.
+       Ayrintilar: GELISTIRICI-KURULUM.md -->
+  <script src="support-user.js" onerror="void 0"></script>
+  <script src="support-boot.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Minimal Header -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-name">AYBARION</span>
+        <span class="brand-badge" data-i18n="ayba.badge">CANLI DESTEK</span>
+      </div>
+
+      <div class="mode-switch" role="tablist" aria-label="Çeviri Modu" data-i18n-attr="aria-label:mode.aria">
+        <button id="modeCameraBtn" class="mode-btn mode-camera-btn" role="tab" aria-selected="false" data-mode="camera"><span aria-hidden="true">📷</span> <span data-i18n="mode.camera">Kamera</span></button>
+        <button id="modeLoopBtn" class="mode-btn active" role="tab" aria-selected="true" data-mode="loop" data-i18n="mode.loop">Canlı Döngü</button>
+        <button id="modeFaceBtn" class="mode-btn" role="tab" aria-selected="false" data-mode="face" data-i18n="mode.face">Yüz Yüze</button>
+        <button id="modeOnlineBtn" class="mode-btn" role="tab" aria-selected="false" data-mode="online" data-i18n="mode.online">Online Oda</button>
+      </div>
+
+      <div class="topbar-actions">
+        <div id="statusPill" class="status-pill" data-state="idle" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="statusText" data-i18n="status.idle">Hazır</span>
+        </div>
+        <div id="modeMenuBtn" class="icon-btn ui-lang-btn mode-menu-btn" title="Çeviri Modu" data-i18n-attr="title:mode.aria">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+          <select id="modeMenuSelect" class="ui-lang-native" aria-label="Çeviri Modu" data-i18n-attr="aria-label:mode.aria">
+            <option value="camera" data-i18n="mode.camera">Kamera</option>
+            <option value="loop" data-i18n="mode.loop">Canlı Döngü</option>
+            <option value="face" data-i18n="mode.face">Yüz Yüze</option>
+            <option value="online" data-i18n="mode.online">Online Oda</option>
+          </select>
+        </div>
+        <button id="aboutBtn" class="icon-btn hidden" title="Hakkında" aria-label="Hakkında" data-i18n-attr="title:about.title;aria-label:about.title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="11"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        </button>
+        <button id="exportBtn" class="icon-btn" title="Sohbeti İndir" aria-label="Sohbeti İndir" data-i18n-attr="title:btn.export;aria-label:btn.export">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button id="clearBtn" class="icon-btn" title="Geçmişi Temizle" aria-label="Geçmişi Temizle" data-i18n-attr="title:btn.clear;aria-label:btn.clear">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+        <div id="uiLangBtn" class="icon-btn ui-lang-btn" title="Arayüz Dili" data-i18n-attr="title:btn.uiLang">
+          <span aria-hidden="true">🌐</span><span id="uiLangBtnCode" class="ui-lang-code" aria-hidden="true">TR</span>
+          <select id="uiLangSelect" class="ui-lang-native" aria-label="Arayüz Dili" data-i18n-attr="aria-label:btn.uiLang"></select>
+        </div>
+        <button id="settingsBtn" class="icon-btn" title="Ayarlar" aria-label="Ayarlar" data-i18n-attr="title:btn.settings;aria-label:btn.settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Browser Compatibility / Error Banner -->
+    <div id="alertBanner" class="alert-banner hidden" role="alert">
+      <span id="alertMessage"></span>
+      <button id="alertCloseBtn" class="alert-close" aria-label="Kapat" data-i18n-attr="aria-label:btn.close">&times;</button>
+    </div>
+
+    <!-- Canli destek paneli (uye / yonetici) -->
+    <section id="aybaPanel" class="ayba-panel" aria-live="polite">
+      <div class="ayba-who-row">
+        <span id="aybaWho" class="ayba-who"></span>
+        <button id="aybaSignOut" type="button" class="ayba-link hidden" data-i18n="ayba.signOut">Test girişinden çık</button>
+      </div>
+
+      <!-- Test girisi (gercek sitede gorunmez) -->
+      <div id="aybaLogin" class="ayba-card hidden">
+        <h2 data-i18n="ayba.loginTitle">Canlı Destek</h2>
+        <p id="aybaNoLogin" class="ayba-muted hidden" data-i18n="ayba.needSiteLogin">Canlı destek için siteye giriş yapın.</p>
+        <form id="aybaTestForm" class="ayba-form hidden" autocomplete="off">
+          <p class="ayba-muted" data-i18n="ayba.testNote">Test girişi: gerçek sitede bu bilgiler sitenin üyelik sisteminden gelir.</p>
+          <label><span data-i18n="ayba.role">Giriş türü</span>
+            <select id="aybaTestRole" class="online-input">
+              <option value="member" data-i18n="ayba.roleMember">Site üyesi (soru soracak)</option>
+              <option value="admin" data-i18n="ayba.roleAdmin">Site yöneticisi</option>
+            </select>
+          </label>
+          <label><span data-i18n="ayba.firstName">Ad</span><input id="aybaTestFirst" class="online-input" maxlength="60" required /></label>
+          <label><span data-i18n="ayba.lastName">Soyad</span><input id="aybaTestLast" class="online-input" maxlength="60" /></label>
+          <label id="aybaTestCompanyRow"><span data-i18n="ayba.company">Firma adı</span><input id="aybaTestCompany" class="online-input" maxlength="120" /></label>
+          <button type="submit" class="online-btn primary" data-i18n="ayba.enter">Giriş yap</button>
+        </form>
+      </div>
+
+      <!-- Uye -->
+      <div id="aybaMember" class="hidden">
+        <div id="aybaMemberIdle" class="ayba-card">
+          <h2 data-i18n="ayba.memberTitle">Sorunuz mu var?</h2>
+          <p class="ayba-muted" data-i18n="ayba.memberIntro">Bir site yöneticisi sizinle birebir, canlı görüşür. Farklı dil konuşuyorsanız konuşmalar anında çevrilir. Aşağıdan konuştuğunuz dili seçin.</p>
+          <p id="aybaMemberEnded" class="ayba-ended hidden" data-i18n="ayba.ended">Görüşme sona erdi. Yeni bir sorunuz olursa tekrar yazabilirsiniz.</p>
+          <button id="aybaAskBtn" type="button" class="online-btn primary ayba-big" data-i18n="ayba.ask">Soru sormak istiyorum</button>
+        </div>
+        <div id="aybaMemberWaiting" class="ayba-card hidden">
+          <div class="ayba-spinner" aria-hidden="true"></div>
+          <h2 data-i18n="ayba.waitTitle">Sıradasınız</h2>
+          <p class="ayba-muted" data-i18n="ayba.waitText">Bir yönetici birazdan bağlanacak. Bu sayfayı kapatmayın.</p>
+          <button id="aybaCancelBtn" type="button" class="online-btn secondary" data-i18n="ayba.cancel">Vazgeç</button>
+        </div>
+        <div id="aybaMemberInCall" class="hidden"></div>
+      </div>
+
+      <!-- Yonetici -->
+      <div id="aybaAdmin" class="hidden">
+        <form id="aybaUnlock" class="ayba-card ayba-form" autocomplete="off">
+          <h2 data-i18n="ayba.adminLogin">Yönetici girişi</h2>
+          <p class="ayba-muted" data-i18n="ayba.adminLoginText">Bekleyenleri görmek için canlı destek yönetici parolasını girin.</p>
+          <label><span data-i18n="ayba.password">Yönetici parolası</span><input id="aybaPassword" type="password" class="online-input" autocomplete="current-password" required /></label>
+          <button id="aybaUnlockBtn" type="submit" class="online-btn primary" data-i18n="ayba.enter">Giriş yap</button>
+          <p id="aybaUnlockMsg" class="ayba-muted" role="status"></p>
+        </form>
+        <div id="aybaConsole" class="hidden">
+          <div class="ayba-console-head">
+            <span id="aybaAdminsOnline" class="ayba-muted"></span>
+            <button id="aybaSoundBtn" type="button" class="icon-btn" aria-pressed="true" title="Sesli bildirim" data-i18n-attr="title:ayba.sound">🔔</button>
+          </div>
+          <section class="ayba-card">
+            <h2><span data-i18n="ayba.queue">Sırada bekleyenler</span> <span id="aybaWaitCount" class="ayba-count">0</span></h2>
+            <p id="aybaWaitEmpty" class="ayba-muted" data-i18n="ayba.queueEmpty">Şu an bekleyen yok.</p>
+            <ul id="aybaWaitList" class="ayba-list"></ul>
+          </section>
+          <section class="ayba-card">
+            <h2><span data-i18n="ayba.sessions">Süren görüşmeler</span> <span id="aybaSessionCount" class="ayba-count">0</span></h2>
+            <p id="aybaSessionEmpty" class="ayba-muted" data-i18n="ayba.sessionsEmpty">Şu an süren görüşme yok.</p>
+            <ul id="aybaSessionList" class="ayba-list"></ul>
+          </section>
+          <section id="aybaDocs" class="ayba-card hidden">
+            <h2 data-i18n="ayba.docs">Bu oturumdaki dökümler</h2>
+            <ul id="aybaDocList" class="ayba-doc-list"></ul>
+          </section>
+        </div>
+        <div id="aybaAdminCall" class="ayba-call-bar hidden">
+          <div>
+            <span class="ayba-muted" data-i18n="ayba.talkingWith">Görüşülen</span>
+            <strong id="aybaCallWith"></strong>
+            <span id="aybaCallStatus" class="ayba-muted"></span>
+          </div>
+          <button id="aybaEndBtn" type="button" class="online-btn secondary leave-btn" data-i18n="ayba.end">Görüşmeyi bitir</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Online Room Panel -->
+    <section id="onlineBar" class="online-bar hidden" aria-label="Online Oda ve Davet" data-i18n-attr="aria-label:online.aria">
+      <div id="onlineJoinView" class="online-join-row">
+        <div class="online-field">
+          <label for="onlineNameInput" class="lang-label" data-i18n="online.nameLabel">ADINIZ</label>
+          <input id="onlineNameInput" type="text" class="online-input" placeholder="Örn: Ahmet" data-i18n-attr="placeholder:online.namePh" maxlength="32" />
+        </div>
+        <div id="onlineRoomField" class="online-field small">
+          <label for="onlineRoomInput" class="lang-label" data-i18n="online.roomLabel">ODA KODU (KATILMAK İÇİN)</label>
+          <input id="onlineRoomInput" type="text" class="online-input mono" placeholder="Örn: K7M3P9" data-i18n-attr="placeholder:online.roomPh" maxlength="12" />
+        </div>
+        <p id="inviteRequiredNote" class="invite-note hidden" data-i18n="invite.required">Bu sayfa yalnızca davet linkiyle açılır.</p>
+        <div class="online-btn-group">
+          <button id="joinRoomBtn" type="button" class="online-btn secondary" data-i18n="online.join">Odaya Katıl</button>
+          <button id="createRoomBtn" type="button" class="online-btn primary" data-i18n="online.create">Yeni Oda Oluştur</button>
+        </div>
+      </div>
+
+      <div id="onlineActiveView" class="online-active-row hidden">
+        <div class="online-room-meta">
+          <span class="online-pill-live"><span class="status-dot"></span> <span data-i18n="online.room">ODA:</span> <strong id="roomCodeBadge">------</strong></span>
+          <span id="tunnelStatusBadge" class="tunnel-badge" data-i18n="online.connecting">Bağlanıyor...</span>
+          <span id="partnerPresenceText" class="presence-text" data-i18n="online.waiting">Karşı taraf bekleniyor...</span>
+          <button id="leaveRoomBtn" type="button" class="online-btn secondary leave-btn" data-i18n="online.leave">Ayrıl</button>
+        </div>
+        <div id="lobbyBar" class="lobby-bar hidden" aria-live="polite"></div>
+        <div class="online-share-group">
+          <input id="inviteLinkInput" type="text" class="online-input mono invite-url" readonly aria-label="Davet Linki" data-i18n-attr="aria-label:online.inviteAria" />
+          <button id="copyInviteBtn" type="button" class="online-btn primary" data-i18n="online.copyInvite">Davet Linkini Kopyala</button>
+          <div id="roomTools" class="room-tools hidden">
+            <button id="lockRoomBtn" type="button" class="online-btn secondary room-tool-btn hidden"></button>
+            <span id="lockedBadge" class="locked-badge hidden"></span>
+            <button id="videoReceiveBtn" type="button" class="online-btn secondary room-tool-btn"></button>
+            <button id="watchRoomBtn" type="button" class="online-btn secondary room-tool-btn watch-btn hidden"></button>
+          </div>
+        </div>
+      </div>
+      <div id="participantsGrid" class="participants-grid hidden" aria-label="Katılımcılar" data-i18n-attr="aria-label:online.participants"></div>
+    </section>
+
+    <!-- Language Pairing Strip -->
+    <section class="lang-bar" aria-label="Dil Seçimi" data-i18n-attr="aria-label:lang.aria">
+      <div class="lang-card lang-me">
+        <label id="myLangCardLabel" for="myLangSelect" class="lang-label">BENİM DİLİM</label>
+        <select id="myLangSelect" class="lang-select"></select>
+      </div>
+
+      <button id="swapLangsBtn" class="swap-btn" title="Dilleri Değiştir" aria-label="Dilleri Değiştir" data-i18n-attr="title:lang.swap;aria-label:lang.swap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+
+      <div class="lang-card lang-partner">
+        <label id="partnerLangCardLabel" for="partnerLangSelect" class="lang-label">KARŞIDAKİNİN DİLİ</label>
+        <select id="partnerLangSelect" class="lang-select"></select>
+      </div>
+    </section>
+
+    <!-- Main Workspace -->
+    <main class="main-grid">
+      <!-- Live Stage (Loop Mode) -->
+      <section id="cameraStage" class="camera-stage hidden" aria-label="Kamerayla yazı çevirme" data-i18n-attr="aria-label:cam.aria">
+        <p class="camera-hint" data-i18n="cam.hint">Menü, tabela veya belgenin fotoğrafını çekin ya da galeriden seçin; yazı okunup çevrilir.</p>
+        <p id="cameraDirection" class="camera-direction" dir="auto"></p>
+        <div class="camera-actions">
+          <label class="online-btn primary camera-pick">
+            <span aria-hidden="true">📷</span> <span data-i18n="cam.take">Fotoğraf Çek</span>
+            <input id="cameraCaptureInput" class="visually-hidden-input" type="file" accept="image/*" capture="environment" />
+          </label>
+          <label class="online-btn secondary camera-pick">
+            <span aria-hidden="true">🖼️</span> <span data-i18n="cam.pick">Galeriden Seç</span>
+            <input id="cameraPickInput" class="visually-hidden-input" type="file" accept="image/*" />
+          </label>
+        </div>
+        <div id="cameraPreviewWrap" class="camera-preview hidden">
+          <img id="cameraPreview" alt="" />
+        </div>
+        <div id="cameraStatus" class="camera-status hidden" role="status" aria-live="polite">
+          <div class="camera-progress"><div id="cameraProgressBar" class="camera-progress-bar"></div></div>
+          <span id="cameraStatusText"></span>
+        </div>
+        <div id="cameraResult" class="camera-result hidden">
+          <label class="lang-label" for="cameraSourceText" data-i18n="cam.recognized">OKUNAN YAZI</label>
+          <textarea id="cameraSourceText" class="camera-text" rows="4" dir="auto"></textarea>
+          <button id="cameraRetranslateBtn" class="mini-btn camera-retranslate" type="button" data-i18n="cam.retranslate">↻ Yeniden Çevir</button>
+          <span class="lang-label" data-i18n="cam.translation">ÇEVİRİ</span>
+          <div id="cameraTranslatedText" class="camera-text camera-translated" dir="auto"></div>
+          <div class="msg-actions">
+            <button id="cameraSpeakBtn" class="mini-btn" type="button" data-i18n="msg.replay">🔊 Seslendir</button>
+            <button id="cameraCopyBtn" class="mini-btn" type="button" data-i18n="msg.copy">📋 Kopyala</button>
+          </div>
+        </div>
+      </section>
+
+      <div id="audioRouteBar" class="audio-route-bar hidden">
+        <button id="speakerTooBtn" type="button" class="audio-route-btn hidden" aria-pressed="false"></button>
+        <button id="watchBtn" type="button" class="audio-route-btn watch-btn hidden" aria-pressed="false"></button>
+      </div>
+
+      <section id="loopStage" class="live-stage" aria-label="Canlı Çeviri Sahnesi" data-i18n-attr="aria-label:stage.aria">
+        <div class="stage-orb-wrap">
+          <canvas id="visualizerCanvas" width="220" height="220" aria-hidden="true"></canvas>
+          <button id="mainToggleBtn" class="orb-btn" data-active="false" aria-label="Canlı Çeviriyi Başlat" data-i18n-attr="aria-label:orb.startAria">
+            <span class="orb-icon" id="orbIcon">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </span>
+            <span class="orb-label" id="orbLabel">Başlat</span>
+          </button>
+        </div>
+
+        <div class="turn-controls">
+          <button id="turnMeBtn" class="turn-pill active" data-speaker="me">
+            <span class="turn-dot me"></span>
+            <span id="turnMeLabel">Ben Konuşuyorum</span>
+          </button>
+          <button id="swapTurnBtn" class="turn-swap-btn" title="Sırayı Değiştir (Tab)" aria-label="Konuşma Sırasını Değiştir" data-i18n="turn.swap" data-i18n-attr="title:turn.swapTitle;aria-label:turn.swapAria">⇄ Sırayı Geçir</button>
+          <button id="turnPartnerBtn" class="turn-pill" data-speaker="partner">
+            <span class="turn-dot partner"></span>
+            <span id="turnPartnerLabel">Karşıdaki Konuşuyor</span>
+          </button>
+        </div>
+
+        <div class="interim-box" aria-live="polite">
+          <p id="interimText" class="interim-text">Canlı çeviriye geçmek için <strong>Başlat</strong>'a basın.</p>
+        </div>
+      </section>
+
+      <!-- Face-to-Face Stage (Hidden by default) -->
+      <section id="faceStage" class="face-stage hidden" aria-label="Yüz Yüze Çeviri" data-i18n-attr="aria-label:face.aria">
+        <div id="facePartnerCard" class="face-card face-partner">
+          <div class="face-meta">
+            <span class="face-who" data-i18n="who.partnerUpper">KARŞIDAKİ</span>
+            <span id="facePartnerLangBadge" class="face-lang-badge">EN</span>
+          </div>
+          <p id="facePartnerText" class="face-preview">Konuşmak için dokunun...</p>
+          <button id="facePartnerBtn" class="face-mic-btn partner" data-speaker="partner">
+            <span>Konuş</span>
+          </button>
+        </div>
+
+        <div id="faceMeCard" class="face-card face-me">
+          <div class="face-meta">
+            <span class="face-who" data-i18n="who.meUpper">BEN</span>
+            <span id="faceMeLangBadge" class="face-lang-badge">TR</span>
+          </div>
+          <p id="faceMeText" class="face-preview">Konuşmak için dokunun...</p>
+          <button id="faceMeBtn" class="face-mic-btn me" data-speaker="me">
+            <span>Konuş</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Conversation Stream -->
+      <section class="stream-panel" aria-label="Konuşma Geçmişi" data-i18n-attr="aria-label:stream.aria">
+        <div class="stream-header">
+          <h2 data-i18n="stream.title">Canlı Döküm</h2>
+          <span id="messageCount" class="stream-count">0 mesaj</span>
+        </div>
+
+        <div id="chatStream" class="chat-stream" role="log" aria-live="polite">
+          <div id="emptyState" class="empty-state">
+            <p data-i18n="stream.empty">Henüz konuşma yok.</p>
+            <span data-i18n="stream.emptyHint">Dilleri seçip mikrofona basın veya aşağıdan yazarak anında sesli çevirin.</span>
+          </div>
+        </div>
+
+        <form id="textTranslateForm" class="text-input-bar">
+          <select id="textSpeakerSelect" class="text-speaker-select" aria-label="Kim yazıyor" data-i18n-attr="aria-label:input.whoAria">
+            <option value="me" data-i18n="who.me">Ben</option>
+            <option value="partner" data-i18n="who.partner">Karşıdaki</option>
+          </select>
+          <label id="attachBtn" class="attach-btn hidden" title="Fotoğraf veya PDF gönder" data-i18n-attr="title:file.attach">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <input id="attachInput" class="visually-hidden-input" type="file" accept="image/jpeg,image/png,image/webp,application/pdf,.jpg,.jpeg,.png,.webp,.pdf" aria-label="Fotoğraf veya PDF gönder" data-i18n-attr="aria-label:file.attach" />
+          </label>
+          <input
+            id="textInput"
+            type="text"
+            class="text-input"
+            placeholder="Yazarak çevir ve seslendir..."
+            data-i18n-attr="placeholder:input.ph"
+            autocomplete="off"
+          />
+          <button type="submit" class="send-btn" aria-label="Çevir ve Seslendir" data-i18n-attr="aria-label:input.send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="settingsTitle" data-i18n="settings.title">CEVIRI Ayarları</h3>
+        <button id="closeSettingsBtn" class="icon-btn" aria-label="Ayarları Kapat" data-i18n-attr="aria-label:settings.close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <label class="setting-row">
+          <div>
+            <strong data-i18n="settings.autoSpeak">Otomatik Sesli Okuma</strong>
+            <span data-i18n="settings.autoSpeakDesc">Çeviriyi karşı tarafın dilinde otomatik seslendir</span>
+          </div>
+          <input id="autoSpeakToggle" type="checkbox" checked />
+        </label>
+
+        <label class="setting-row">
+          <div>
+            <strong data-i18n="settings.autoLoop">Akıllı Sıra Geçişi (Canlı Döngü)</strong>
+            <span data-i18n="settings.autoLoopDesc">Çeviri seslendirildikten sonra mikrofon otomatik karşı tarafa geçer</span>
+          </div>
+          <input id="autoLoopToggle" type="checkbox" checked />
+        </label>
+
+        <label class="setting-row">
+          <div>
+            <strong data-i18n="settings.autoDetect">Konuşanı Dilinden Tanı (Canlı Döngü)</strong>
+            <span data-i18n="settings.autoDetectDesc">Söylenen cümle karşı tarafın dilindeyse sırayı kendiliğinden düzeltir</span>
+          </div>
+          <input id="autoDetectToggle" type="checkbox" checked />
+        </label>
+
+        <label class="setting-row">
+          <div>
+            <strong data-i18n="settings.keepAwake">Ekran Açık Kalsın</strong>
+            <span data-i18n="settings.keepAwakeDesc">Canlı çeviri sırasında ve odadayken ekran kararmaz, mikrofon kapanmaz</span>
+          </div>
+          <input id="keepAwakeToggle" type="checkbox" checked />
+        </label>
+
+        <label id="headsetButtonRow" class="setting-row native-only">
+          <div>
+            <strong data-i18n="settings.headsetButton">Kulaklık Düğmesiyle Konuş</strong>
+            <span data-i18n="settings.headsetButtonDesc">Kulaklıktaki oynat/duraklat düğmesi konuşmayı başlatır ve durdurur</span>
+          </div>
+          <input id="headsetButtonToggle" type="checkbox" checked />
+        </label>
+
+        <div id="offlineSection" class="setting-row column native-only">
+          <div class="setting-row-top">
+            <strong data-i18n="offline.title">Çevrimdışı Çeviri</strong>
+          </div>
+          <span class="setting-desc" data-i18n="offline.desc">İnternet yokken çeviri için seçili dillerin paketlerini indirin (her biri yaklaşık 30 MB, Wi-Fi önerilir).</span>
+          <div id="offlineLangs" class="offline-langs"></div>
+          <span class="setting-desc" data-i18n="offline.speechTip">Konuşmanın yazıya dökülmesi için telefonun Ayarlar › Google › Ses › Çevrimdışı konuşma tanıma bölümünden de aynı dilleri indirin.</span>
+        </div>
+
+        <label class="setting-row">
+          <div>
+            <strong data-i18n="settings.flip">Karşı Tarafı 180° Ters Çevir</strong>
+            <span data-i18n="settings.flipDesc">Yüz Yüze modda cihazı masaya koyarken üst paneli ters çevirir</span>
+          </div>
+          <input id="flipPartnerToggle" type="checkbox" />
+        </label>
+
+        <div class="setting-row column">
+          <div class="setting-row-top">
+            <strong data-i18n="settings.rate">Seslendirme Hızı</strong>
+            <span id="rateValueLabel">1.0x</span>
+          </div>
+          <input id="speechRateRange" type="range" min="0.75" max="1.4" step="0.05" value="1.0" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal-card export-card">
+      <div class="modal-header">
+        <h3 id="exportTitle" data-i18n="export.menuTitle">Konuşmayı Dışa Aktar</h3>
+        <button id="closeExportBtn" class="icon-btn" aria-label="Kapat" data-i18n-attr="aria-label:settings.close">&times;</button>
+      </div>
+      <div class="modal-body export-options">
+        <button id="exportPdfBtn" type="button" class="online-btn primary" data-i18n="export.pdf">📄 PDF olarak kaydet</button>
+        <button id="exportTxtBtn" type="button" class="online-btn secondary" data-i18n="export.txt">📝 Metin olarak kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="aboutModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+    <div class="modal-card about-card">
+      <div class="modal-header">
+        <h3 id="aboutTitle" data-i18n="about.title">Hakkında</h3>
+        <button id="closeAboutBtn" class="icon-btn" aria-label="Kapat" data-i18n-attr="aria-label:settings.close">&times;</button>
+      </div>
+      <div class="modal-body about-body">
+        <p class="about-head">CEVIRI<br>Copyright © 2026 kerilov1138. Tüm hakları saklıdır. All rights reserved.</p>
+        <p class="about-accept">Uygulamayı kullanan herkes burada yazılanları kabul etmiş bulunmaktadır.</p>
+        <h4>Lisans ve Sorumluluk Reddi</h4>
+        <ol>
+          <li>Bu uygulamanın kaynak kodları, uygulama dosyaları (APK, EXE) ve web sürümü telif hakkı sahibine aittir. Yazılı izin olmadan kopyalanamaz, değiştirilerek ya da değiştirilmeden yeniden yayınlanamaz, satılamaz ve başka bir üründe kullanılamaz. Kodun GitHub'da görünür olması bu hakları vermez.</li>
+          <li>Yazılım "OLDUĞU GİBİ" sunulur. Çalışacağına, kesintisiz ya da hatasız olacağına, çevirilerin doğru olacağına veya belirli bir amaca uygun olacağına dair açık ya da örtülü hiçbir garanti verilmez.</li>
+          <li>Uygulamanın (online oda, sesli sohbet, kamera, dosya paylaşımı ve diğer özellikler dahil) kullanımından, kullanıcıların paylaştığı içeriklerden, yanlış çeviriden, veri kaybından ve her türlü doğrudan ya da dolaylı zarardan telif hakkı sahibi sorumlu tutulamaz. Her kullanıcı, uygulamayı kullanma biçimiyle ve paylaştığı içerikle ilgili tüm yasal sorumluluğu kendisi taşır.</li>
+          <li>Bu yazılımın izinsiz kopyalanmış, değiştirilmiş ya da yeniden yayınlanmış sürümlerinden ve bunların kullanımından telif hakkı sahibi hiçbir şekilde sorumlu değildir.</li>
+          <li>Uygulama çeviri, konuşma tanıma ve bağlantı için üçüncü taraf hizmetler kullanır. Bu hizmetlerin kullanımı ilgili hizmet sağlayıcıların koşullarına tabidir.</li>
+        </ol>
+        <h4 lang="en">License and Disclaimer</h4>
+        <p class="about-accept" lang="en">Everyone who uses the application is deemed to have accepted the terms written here.</p>
+        <ol lang="en">
+          <li>The source code, application files (APK, EXE) and web version belong to the copyright holder. They may not be copied, redistributed (modified or unmodified), sold or used in other products without prior written permission. Public visibility on GitHub does not grant these rights.</li>
+          <li>The software is provided "as is", without warranty of any kind, express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy of translations and non-infringement.</li>
+          <li>In no event shall the copyright holder be liable for any claim, damages or other liability arising from the use of the software (including online rooms, voice chat, camera and file sharing), from content shared by users, or from inaccurate translations. Each user is solely responsible for how they use the software and for the content they share.</li>
+          <li>The copyright holder is not responsible in any way for unauthorized copies, modified or redistributed versions of this software, or their use.</li>
+          <li>The application relies on third-party services for translation, speech recognition and connectivity; their use is subject to those providers' terms.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script src="web-url.js"></script>
+  <script src="mqtt.min.js"></script>
+  <script src="online-relay.js"></script>
+  <script src="android-shim.js"></script>
+  <script src="support-crypto.js"></script>
+  <script src="support-desk.js"></script>
+  <script src="lib/html2canvas.min.js"></script>
+  <script src="lib/jspdf.umd.min.js"></script>
+  <script src="support-transcript.js"></script>
+  <script src="support-ui.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

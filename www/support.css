@@ -1,0 +1,246 @@
+/* CEVIRI_AYBARION - Canli destek ekranlari */
+
+/* Canli destekte gereksiz CEVIRI parcalari */
+html.ayba .mode-switch,
+html.ayba #modeMenuBtn,
+html.ayba #clearBtn,
+html.ayba #onlineJoinView,
+html.ayba #inviteLinkInput,
+html.ayba #copyInviteBtn,
+html.ayba #lockRoomBtn,
+html.ayba #lockedBadge,
+html.ayba #watchRoomBtn,
+html.ayba #lobbyBar,
+html.ayba .online-pill-live,
+html.ayba .lang-partner,
+html.ayba #swapLangsBtn,
+html.ayba #audioRouteBar,
+html.ayba #cameraStage,
+html.ayba #faceStage,
+html.ayba .native-only {
+  display: none !important;
+}
+
+/* Musteri dokum alamaz: yalnizca yoneticiler */
+html.ayba-member #exportBtn {
+  display: none !important;
+}
+
+/* Gorusme disinda: yalnizca destek paneli ve dil secimi */
+html.ayba:not([data-ayba-phase='call']):not([data-ayba-phase='joining']) #onlineBar,
+html.ayba:not([data-ayba-phase='call']):not([data-ayba-phase='joining']) .main-grid {
+  display: none !important;
+}
+html.ayba-admin[data-ayba-phase='locked'] .lang-bar,
+html.ayba.ayba-login .lang-bar,
+html.ayba.ayba-login .main-grid,
+html.ayba.ayba-login #onlineBar {
+  display: none !important;
+}
+html.ayba .lang-bar {
+  grid-template-columns: 1fr;
+}
+
+.ayba-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.ayba-who-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 1.2em;
+}
+.ayba-who {
+  font-weight: 600;
+  color: var(--text);
+}
+.ayba-link {
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.ayba-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.ayba-card + .ayba-card {
+  margin-top: 12px;
+}
+.ayba-card h2 {
+  margin: 0 0 6px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ayba-muted {
+  color: var(--text-muted);
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+.ayba-ended {
+  background: var(--me-soft);
+  border: 1px solid var(--me);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin: 0 0 12px;
+}
+.ayba-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ayba-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.ayba-form .online-btn {
+  align-self: flex-start;
+}
+.ayba-big {
+  font-size: 1.05rem;
+  padding: 14px 22px;
+}
+.ayba-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--border-strong);
+  border-top-color: var(--me);
+  animation: ayba-spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+@keyframes ayba-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ayba-spinner {
+    animation: none;
+  }
+}
+
+.ayba-console-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ayba-console-head .ayba-muted {
+  margin: 0;
+}
+.ayba-count {
+  min-width: 1.8em;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.ayba-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ayba-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.ayba-item.busy {
+  opacity: 0.85;
+}
+.ayba-item.mine {
+  border-color: var(--me);
+}
+.ayba-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.ayba-item-main strong {
+  overflow-wrap: anywhere;
+}
+.ayba-person,
+.ayba-wait {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+.ayba-take {
+  flex-shrink: 0;
+}
+.ayba-busy-tag {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+.ayba-doc-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+.ayba-doc-list a {
+  color: var(--text);
+}
+.ayba-call-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.ayba-call-bar strong {
+  margin-inline: 6px;
+}
+.ayba-call-bar .ayba-muted {
+  margin: 0;
+}
+@media (max-width: 560px) {
+  .ayba-item {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .ayba-call-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+/* Gorusme sirasinda panel gizlenir; yoneticide "Ayril" dugmesi "Gorusmeyi bitir" olur */
+html.ayba[data-ayba-phase='call'] #aybaPanel,
+html.ayba[data-ayba-phase='joining'] #aybaPanel {
+  display: none !important;
+}
+/* Bire bir gorusmede kimse kimseyi cikaramaz; oda sahibi tacina gerek yok */
+html.ayba .p-kick-btn,
+html.ayba .p-owner {
+  display: none !important;
+}

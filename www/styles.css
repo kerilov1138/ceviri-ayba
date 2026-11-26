@@ -1,0 +1,2178 @@
+:root {
+  --bg: #09090b;
+  --surface: #111114;
+  --surface-2: #18181d;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --text: #fafafa;
+  --text-muted: #a1a1aa;
+  --text-dim: #71717a;
+
+  --me: #10b981;
+  --me-soft: rgba(16, 185, 129, 0.14);
+  --partner: #818cf8;
+  --partner-soft: rgba(129, 140, 248, 0.14);
+  --warn: #f59e0b;
+  --danger: #ef4444;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+  color: inherit;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.app-shell {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 18px 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100vh;
+}
+
+/* Header */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--me), var(--partner));
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.1em;
+}
+
+.brand-badge {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+  color: var(--me);
+  background: var(--me-soft);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.mode-switch {
+  display: inline-flex;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.mode-btn {
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.mode-btn.active {
+  background: var(--surface-2);
+  color: var(--text);
+  box-shadow: inset 0 0 0 1px var(--border-strong);
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-dim);
+}
+
+.status-pill[data-state='listening'] {
+  color: var(--me);
+  border-color: rgba(16, 185, 129, 0.35);
+}
+.status-pill[data-state='listening'] .status-dot {
+  background: var(--me);
+  box-shadow: 0 0 8px var(--me);
+}
+
+.status-pill[data-state='translating'] {
+  color: var(--warn);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+.status-pill[data-state='translating'] .status-dot {
+  background: var(--warn);
+}
+
+.status-pill[data-state='speaking'] {
+  color: var(--partner);
+  border-color: rgba(129, 140, 248, 0.35);
+}
+.status-pill[data-state='speaking'] .status-dot {
+  background: var(--partner);
+  box-shadow: 0 0 8px var(--partner);
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover:not(:disabled) {
+  color: var(--text);
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Alert Banner */
+.alert-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fecaca;
+  font-size: 0.9rem;
+}
+
+.alert-close {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* Language Bar */
+.lang-bar {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.lang-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s ease;
+}
+
+.lang-me {
+  border-left: 3px solid var(--me);
+}
+
+.lang-partner {
+  border-left: 3px solid var(--partner);
+}
+
+.lang-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.lang-select {
+  background: transparent;
+  border: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.lang-select option {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.swap-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.swap-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+  transform: rotate(180deg);
+}
+
+/* Main Grid */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px;
+  flex: 1;
+  min-height: 480px;
+}
+
+/* Live Stage (Loop Mode) */
+.live-stage {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.stage-orb-wrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#visualizerCanvas {
+  position: absolute;
+  inset: 0;
+  width: 220px;
+  height: 220px;
+  pointer-events: none;
+}
+
+.orb-btn {
+  position: relative;
+  z-index: 2;
+  width: 132px;
+  height: 132px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: radial-gradient(circle at 30% 30%, #27272f, #121216);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.orb-btn:hover {
+  transform: scale(1.03);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.orb-btn[data-active='true'][data-speaker='me'] {
+  border-color: var(--me);
+  box-shadow: 0 0 40px rgba(16, 185, 129, 0.28);
+}
+
+.orb-btn[data-active='true'][data-speaker='partner'] {
+  border-color: var(--partner);
+  box-shadow: 0 0 40px rgba(129, 140, 248, 0.28);
+}
+
+.orb-btn.locked-remote,
+.orb-btn:disabled {
+  opacity: 0.32;
+  filter: grayscale(0.85);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+
+.orb-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+/* Turn Controls */
+.turn-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.turn-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.turn-pill.active[data-speaker='me'] {
+  color: var(--me);
+  border-color: rgba(16, 185, 129, 0.45);
+  background: var(--me-soft);
+}
+
+.turn-pill.active[data-speaker='partner'] {
+  color: var(--partner);
+  border-color: rgba(129, 140, 248, 0.45);
+  background: var(--partner-soft);
+}
+
+.turn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+.turn-dot.me { background: var(--me); }
+.turn-dot.partner { background: var(--partner); }
+
+.turn-swap-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.turn-swap-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.interim-box {
+  width: 100%;
+  min-height: 76px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.interim-text {
+  margin: 0;
+  font-size: 0.96rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.interim-text.live {
+  color: var(--text);
+  font-weight: 500;
+}
+
+/* Face-to-Face Stage */
+.face-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.face-card {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  transition: transform 0.25s ease, border-color 0.2s ease;
+}
+
+.face-card.flipped {
+  transform: rotate(180deg);
+}
+
+.face-card.active-me {
+  border-color: var(--me);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.25);
+}
+
+.face-card.active-partner {
+  border-color: var(--partner);
+  box-shadow: inset 0 0 0 1px rgba(129, 140, 248, 0.25);
+}
+
+.face-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.face-who {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.face-lang-badge {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+.face-preview {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.face-mic-btn {
+  align-self: flex-start;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: 0;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.face-mic-btn.me {
+  background: var(--me);
+  color: #052e16;
+}
+
+.face-mic-btn.partner {
+  background: var(--partner);
+  color: #0f172a;
+}
+
+/* Conversation Stream */
+.stream-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 600px;
+}
+
+.stream-header {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stream-header h2 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.stream-count {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+
+.chat-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty-state {
+  margin: auto;
+  text-align: center;
+  max-width: 280px;
+  color: var(--text-dim);
+}
+
+.empty-state p {
+  margin: 0 0 6px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.empty-state span {
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.msg-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.msg-card.me {
+  border-left: 3px solid var(--me);
+}
+
+.msg-card.partner {
+  border-left: 3px solid var(--partner);
+}
+
+.msg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.msg-speaker {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.msg-card.me .msg-speaker { color: var(--me); }
+.msg-card.partner .msg-speaker { color: var(--partner); }
+
+.msg-original {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.msg-translated {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.msg-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.mini-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.mini-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+/* Text Input Bar */
+.text-input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--border);
+  background: rgba(9, 9, 11, 0.55);
+}
+
+.text-speaker-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.text-input {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 0.88rem;
+  outline: none;
+}
+
+.text-input:focus {
+  border-color: var(--border-strong);
+}
+
+.send-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 0;
+  background: var(--me);
+  color: #052e16;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.send-btn:hover {
+  filter: brightness(1.08);
+}
+
+/* Settings Modal */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.modal-body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  cursor: pointer;
+}
+
+.setting-row.column {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  cursor: default;
+}
+
+.setting-row-top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+}
+
+.setting-row strong {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: 2px;
+}
+
+.setting-row span {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+/* Online Room Panel */
+.online-bar {
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+
+.online-join-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.online-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 170px;
+}
+
+.online-field.small {
+  flex: 0.7;
+  min-width: 150px;
+}
+
+.online-input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  outline: none;
+  width: 100%;
+}
+
+.online-input:focus {
+  border-color: var(--me);
+}
+
+.online-input.mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.online-btn-group,
+.online-share-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.online-btn {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.online-btn.primary {
+  background: var(--me);
+  border-color: var(--me);
+  color: #052e16;
+}
+
+.online-btn.secondary {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.online-btn:hover {
+  filter: brightness(1.08);
+}
+
+.online-active-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.online-room-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 0.84rem;
+}
+
+.online-pill-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--me-soft);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: var(--me);
+  font-family: var(--font-mono);
+}
+
+.online-pill-live .status-dot {
+  background: var(--me);
+  box-shadow: 0 0 8px var(--me);
+}
+
+.tunnel-badge {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.presence-text {
+  color: var(--partner);
+  font-weight: 500;
+}
+
+.invite-url {
+  flex: 1;
+  min-width: 220px;
+  color: var(--text-muted);
+}
+
+.qr-modal-body {
+  align-items: center;
+  text-align: center;
+}
+
+.qr-frame {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#qrCanvas {
+  display: block;
+  max-width: 240px;
+  max-height: 240px;
+}
+
+.qr-hint {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.qr-url-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 880px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lang-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .swap-btn {
+    margin: 0 auto;
+    transform: rotate(90deg);
+  }
+
+  .stream-panel {
+    max-height: 460px;
+  }
+}
+
+/* Arayuz dili dugmesi (🌐) ve secimi */
+.icon-btn.ui-lang-btn {
+  width: auto;
+  min-width: 36px;
+  padding: 0 8px;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.ui-lang-btn span[aria-hidden] {
+  font-size: 15px;
+  line-height: 1;
+}
+/* Gorunmez yerel liste dugmenin tamamini kaplar: dokununca dil listesi acilir */
+.ui-lang-btn {
+  position: relative;
+  cursor: pointer;
+}
+.ui-lang-native {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px;
+  border: 0;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Sagdan sola diller (Arapca, Farsca, Ibranice) */
+html[dir='rtl'] body {
+  text-align: right;
+}
+html[dir='rtl'] .chat-stream,
+html[dir='rtl'] .interim-text,
+html[dir='rtl'] .face-preview {
+  direction: rtl;
+}
+/* Kod, link ve oda kodu her zaman soldan saga */
+html[dir='rtl'] .mono,
+html[dir='rtl'] .invite-url,
+html[dir='rtl'] #roomCodeBadge {
+  direction: ltr;
+  unicode-bidi: plaintext;
+}
+
+/* Misafir (davet linki / QR ile web sitesinden gelen): yalnizca Online Oda */
+.guest-mode #modeCameraBtn,
+.guest-mode #modeLoopBtn,
+.guest-mode #modeFaceBtn,
+.guest-mode #cameraStage,
+.guest-mode #faceStage {
+  display: none !important;
+}
+
+/* 4 sekme dar ekranda tasmasin: yatay kaydirilabilir */
+.mode-switch {
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.mode-switch::-webkit-scrollbar {
+  display: none;
+}
+.mode-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Kamerayla yazi cevirme */
+.camera-stage {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.camera-hint {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.camera-direction {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.camera-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.camera-pick {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1 1 160px;
+  justify-content: center;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+}
+.visually-hidden-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.camera-preview {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  max-height: 260px;
+  display: flex;
+  justify-content: center;
+}
+.camera-preview img {
+  max-width: 100%;
+  max-height: 260px;
+  object-fit: contain;
+}
+.camera-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+.camera-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+.camera-progress-bar {
+  height: 100%;
+  width: 0;
+  background: var(--me);
+  transition: width 0.2s ease;
+}
+.camera-result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.camera-text {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  resize: vertical;
+}
+.camera-translated {
+  border-color: var(--me);
+  background: var(--me-soft);
+  min-height: 3em;
+}
+.camera-retranslate {
+  align-self: flex-start;
+}
+@media (max-width: 440px) {
+  .mode-switch {
+    gap: 2px;
+  }
+  .mode-btn {
+    padding: 7px 9px;
+    font-size: 0.78rem;
+  }
+}
+
+/* Online odada fotograf / PDF paylasimi */
+.attach-btn {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.attach-btn:hover {
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+.attach-btn.busy {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.file-body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  padding: 10px;
+  cursor: pointer;
+  text-align: start;
+  color: var(--text);
+  font: inherit;
+  width: 100%;
+}
+.file-body:hover {
+  border-color: var(--border-strong);
+}
+.file-thumb {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  object-fit: cover;
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+}
+img.file-thumb {
+  display: block;
+}
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.file-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-meta {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+}
+.file-state {
+  color: var(--me);
+  font-size: 0.82rem;
+}
+.file-card.failed .file-state {
+  color: var(--danger);
+}
+
+/* Online oda: katilimci kutulari (en fazla 6) ve kamera */
+.participants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+.p-tile {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.p-tile.speaking {
+  border-color: var(--me);
+  box-shadow: 0 0 0 3px var(--me-soft);
+}
+.p-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+.p-video.mirror {
+  transform: scaleX(-1);
+}
+.p-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--partner-soft);
+  color: var(--partner);
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.p-tile.me .p-avatar {
+  background: var(--me-soft);
+  color: var(--me);
+}
+.p-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  font-size: 0.74rem;
+}
+.p-name {
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #fff;
+}
+.p-lang {
+  font-family: var(--font-mono);
+  color: #d4d4d8;
+  flex-shrink: 0;
+}
+.p-badges {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  display: flex;
+  gap: 4px;
+  font-size: 0.78rem;
+}
+.p-badges span {
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 999px;
+  padding: 2px 7px;
+  color: #fff;
+}
+.p-note {
+  position: absolute;
+  top: 34px;
+  left: 6px;
+  right: 6px;
+  font-size: 0.7rem;
+  color: var(--warn);
+  text-align: center;
+}
+.p-cam-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  border: 1px solid var(--border-strong);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.p-cam-btn.on {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+.p-cam-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Grup odasi: konusan varken buyuk dugme "Soz Iste" olur */
+.orb-btn.raise-hand,
+#mainToggleBtn.raise-hand {
+  box-shadow: 0 0 0 2px var(--warn);
+}
+#mainToggleBtn.in-queue {
+  box-shadow: 0 0 0 2px var(--partner);
+}
+
+/* Oda araclari: kilit (oda sahibi), kilitli bilgisi, goruntuleri alma */
+.room-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+.room-tool-btn {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+.room-tool-btn.active {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+.locked-badge {
+  font-size: 0.8rem;
+  color: var(--warn);
+}
+.p-kick-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.p-kick-btn:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+
+/* Konusanin kutusu buyuk ve en ustte */
+.p-tile.speaking {
+  grid-column: 1 / -1;
+  order: -1;
+  aspect-ratio: 16 / 9;
+}
+.p-tile.speaking .p-avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 2rem;
+}
+
+/* =====================================================================
+   Online odadayken tek ekran duzeni
+   Kameralar, konusma akisi, canli yazi ve mikrofon ayni ekranda;
+   sayfa kaymaz, yalnizca konusma akisi kendi icinde kayar.
+   ===================================================================== */
+body.in-room {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.in-room .app-shell {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  max-width: 1440px;
+  padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(10px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows:
+    auto auto auto
+    clamp(150px, 28dvh, 400px)
+    minmax(0, 1fr)
+    auto auto auto;
+  grid-template-areas:
+    'top'
+    'strip'
+    'lang'
+    'video'
+    'stream'
+    'caption'
+    'input'
+    'mic';
+}
+
+/* Kapsayicilar kutusunu birakir; icerikleri dogrudan yerlesir */
+body.in-room #onlineBar,
+body.in-room .main-grid,
+body.in-room #loopStage,
+body.in-room .stream-panel {
+  display: contents;
+}
+body.in-room .stream-header,
+body.in-room #visualizerCanvas {
+  display: none;
+}
+
+body.in-room .topbar { grid-area: top; }
+body.in-room #onlineActiveView { grid-area: strip; }
+body.in-room .lang-bar { grid-area: lang; }
+body.in-room #participantsGrid { grid-area: video; }
+body.in-room #chatStream { grid-area: stream; }
+body.in-room .interim-box { grid-area: caption; }
+body.in-room #textTranslateForm { grid-area: input; }
+body.in-room .stage-orb-wrap { grid-area: mic; }
+
+/* Uyarilar akisi itmez: ustte bildirim olarak gorunur */
+body.in-room .alert-banner {
+  position: fixed;
+  z-index: 50;
+  top: max(10px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100% - 24px));
+  background: #2a1214;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* --- Ust cubuk: telefonda iki sira (marka + araclar / modlar) --- */
+body.in-room .topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 10px;
+}
+body.in-room .brand-badge {
+  display: none;
+}
+body.in-room .brand {
+  display: none;
+}
+body.in-room .topbar-actions {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+body.in-room .status-pill {
+  margin-inline-end: auto;
+  min-width: 0;
+}
+body.in-room .mode-switch {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: flex;
+  width: 100%;
+}
+body.in-room .mode-btn {
+  flex: 1 1 auto;
+  padding: 5px 6px;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+html.guest-mode body.in-room .mode-switch {
+  display: none; /* linkle girende tek sekme var, yer kaplamasin */
+}
+body.in-room .topbar-actions {
+  gap: 6px;
+}
+
+/* --- Oda seridi: kod + kim var, altta tek sira dugmeler --- */
+body.in-room .online-active-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 8px;
+  gap: 8px;
+  min-width: 0;
+}
+body.in-room .online-room-meta {
+  flex-wrap: nowrap;
+  gap: 8px;
+  font-size: 0.8rem;
+  min-width: 0;
+}
+body.in-room .online-pill-live {
+  flex-shrink: 0;
+  padding: 3px 9px;
+}
+body.in-room .tunnel-badge {
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 3px 9px;
+}
+body.in-room .tunnel-badge[data-state='ready'] {
+  display: none; /* baglanti sorunsuzsa yer kaplamaz; sorun olursa gorunur */
+}
+body.in-room .presence-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.in-room .online-share-group {
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+body.in-room .invite-url {
+  display: none;
+}
+body.in-room .online-active-row .online-btn {
+  flex: 0 1 auto;
+  padding: 6px 10px;
+  font-size: 0.74rem;
+  border-radius: 999px;
+}
+body.in-room .room-tools {
+  display: contents; /* dugmeler tek tek sarar, grup halinde alt satira dusmez */
+}
+body.in-room .room-tools.hidden {
+  display: none !important;
+}
+body.in-room .locked-badge {
+  white-space: nowrap;
+  font-size: 0.76rem;
+}
+body.in-room .leave-btn {
+  margin-inline-start: auto;
+  flex-shrink: 0;
+  padding: 5px 12px !important;
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+
+/* --- Diller: tek sira, sade --- */
+body.in-room .lang-bar {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+}
+body.in-room .lang-card {
+  padding: 6px 12px;
+  gap: 1px;
+  border-radius: 12px;
+  min-width: 0;
+}
+body.in-room .lang-label {
+  font-size: 0.62rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.in-room .lang-select {
+  font-size: 0.9rem;
+  text-overflow: ellipsis;
+}
+
+/* --- Kameralar: alani doldurur, kutu sayisi JS ile secilir --- */
+body.in-room .participants-grid {
+  margin: 0;
+  min-height: 0;
+  min-width: 0;
+  height: 100%;
+  gap: 6px;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--rows, 1), minmax(0, 1fr));
+}
+body.in-room .participants-grid[data-layout='speaker'] {
+  grid-template-rows: minmax(0, 2.4fr) minmax(0, 1fr);
+}
+body.in-room .p-tile,
+body.in-room .p-tile.speaking {
+  aspect-ratio: auto;
+  min-height: 0;
+  min-width: 0;
+  border-radius: 12px;
+}
+body.in-room .participants-grid[data-layout='even'] .p-tile.speaking {
+  grid-column: auto;
+}
+body.in-room .participants-grid[data-layout='speaker'] .p-tile.speaking {
+  grid-column: 1 / -1;
+}
+body.in-room .participants-grid[data-layout='speaker'] .p-tile:not(.speaking) .p-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 1rem;
+}
+body.in-room .participants-grid[data-layout='speaker'] .p-tile:not(.speaking) .p-lang {
+  display: none;
+}
+
+/* --- Konusma akisi: kalan alani alir, kendi icinde kayar --- */
+body.in-room .chat-stream {
+  min-height: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px;
+  gap: 8px;
+  overscroll-behavior: contain;
+}
+body.in-room .msg-card {
+  padding: 9px 12px;
+  gap: 5px;
+  border-radius: 12px;
+}
+body.in-room .empty-state span {
+  font-size: 0.8rem;
+}
+
+/* --- Canli yazi: o an soylenen, mikrofonun hemen ustunde --- */
+body.in-room .interim-box {
+  min-height: 0;
+  padding: 8px 12px;
+  border-radius: 12px;
+  justify-content: flex-start;
+  text-align: start;
+}
+body.in-room .interim-text {
+  font-size: 0.86rem;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+body.in-room .interim-text.live {
+  font-size: 0.95rem;
+}
+
+/* --- Yazma cubugu --- */
+body.in-room .text-input-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 6px;
+  gap: 6px;
+}
+body.in-room .text-input {
+  min-width: 0;
+}
+
+/* --- Mikrofon: genis, basparmakla kolay basilan dugme --- */
+body.in-room .stage-orb-wrap {
+  width: auto;
+  height: auto;
+  display: block;
+}
+body.in-room .orb-btn {
+  width: 100%;
+  height: 54px;
+  border-radius: 16px;
+  flex-direction: row;
+  gap: 10px;
+  padding: 0 16px;
+  background: var(--surface-2);
+}
+body.in-room .orb-btn:hover {
+  transform: none;
+}
+body.in-room .orb-icon svg {
+  width: 22px;
+  height: 22px;
+}
+body.in-room .orb-label {
+  font-size: 0.98rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+body.in-room .orb-btn[data-active='true'][data-speaker='me'] {
+  background: var(--me-soft);
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.22);
+}
+body.in-room .orb-btn[data-active='true'][data-speaker='partner'] {
+  background: var(--partner-soft);
+  box-shadow: 0 0 24px rgba(129, 140, 248, 0.22);
+}
+
+/* Kisa telefonlar: kameralara biraz daha az yer */
+@media (max-height: 700px) and (orientation: portrait) {
+  body.in-room .app-shell {
+    grid-template-rows: auto auto auto clamp(120px, 24dvh, 260px) minmax(0, 1fr) auto auto auto;
+    gap: 6px;
+    padding-top: max(6px, env(safe-area-inset-top));
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+  body.in-room .online-active-row {
+    padding: 6px 8px;
+    gap: 6px;
+  }
+  body.in-room .lang-card {
+    padding: 4px 10px;
+  }
+  body.in-room .interim-box {
+    padding: 6px 10px;
+  }
+  body.in-room .interim-text {
+    -webkit-line-clamp: 1;
+  }
+  body.in-room .orb-btn {
+    height: 48px;
+  }
+}
+
+/* Orta genislik (tablet dikey): marka + araclar ustte, modlar altta */
+@media (min-width: 700px) {
+  body.in-room .brand {
+    display: flex;
+    grid-column: 1;
+    grid-row: 1;
+  }
+  body.in-room .topbar-actions {
+    grid-column: 2;
+  }
+  body.in-room .status-pill {
+    margin-inline-end: 0;
+  }
+  body.in-room .mode-switch {
+    width: auto;
+    justify-self: start;
+  }
+  body.in-room .mode-btn {
+    flex: 0 0 auto;
+    padding: 5px 12px;
+    font-size: 0.82rem;
+  }
+}
+
+/* Genis ekran ve yatay telefon: ust cubuk tek sira */
+@media (min-width: 1000px), (orientation: landscape) and (max-height: 520px) and (min-width: 600px) {
+  body.in-room .topbar {
+    display: flex;
+    flex-wrap: nowrap;
+  }
+  body.in-room .mode-switch {
+    margin-inline-start: auto;
+  }
+  body.in-room .topbar-actions {
+    margin-inline-start: 8px;
+  }
+}
+
+/* Tablet dikey: kameralar daha buyuk, yazma ve mikrofon yan yana */
+@media (min-width: 700px) and (orientation: portrait) {
+  body.in-room .app-shell {
+    gap: 10px;
+    padding-inline: max(18px, env(safe-area-inset-left));
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.42fr);
+    grid-template-rows: auto auto auto clamp(220px, 40dvh, 640px) minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'top top'
+      'strip strip'
+      'lang lang'
+      'video video'
+      'stream stream'
+      'caption caption'
+      'input mic';
+  }
+  body.in-room .orb-btn {
+    height: 100%;
+    min-height: 52px;
+  }
+}
+
+/* Yatay ekran (tablet, yatay telefon, bilgisayar): solda kameralar, sagda akis */
+@media (min-width: 700px) and (orientation: landscape) {
+  body.in-room .app-shell {
+    gap: 10px;
+    grid-template-columns: minmax(0, 1.55fr) minmax(300px, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'top top'
+      'strip strip'
+      'video lang'
+      'video stream'
+      'video caption'
+      'mic input';
+  }
+  body.in-room .online-active-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+  body.in-room .online-room-meta {
+    display: contents;
+  }
+  body.in-room .online-share-group {
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    order: 5;
+  }
+  body.in-room .online-active-row {
+    gap: 8px;
+    font-size: 0.8rem;
+  }
+  body.in-room .leave-btn {
+    order: 6;
+    margin-inline-start: 0;
+  }
+  body.in-room .orb-btn {
+    height: 100%;
+    min-height: 48px;
+  }
+}
+
+/* Genis ekranda davet linki de gorunur */
+@media (min-width: 1100px) and (orientation: landscape) {
+  body.in-room .invite-url {
+    display: block;
+    flex: 0 1 300px;
+    min-width: 160px;
+    padding: 6px 12px;
+    font-size: 0.8rem;
+    border-radius: 999px;
+  }
+}
+
+/* Yatay telefon (alcak ekran): daha sikisik */
+@media (max-height: 520px) and (orientation: landscape) {
+  body.in-room .app-shell {
+    gap: 6px;
+    padding-block: max(6px, env(safe-area-inset-top)) max(6px, env(safe-area-inset-bottom));
+  }
+  body.in-room .brand {
+    display: none;
+  }
+  body.in-room .mode-btn {
+    padding: 4px 10px;
+  }
+  body.in-room .online-active-row {
+    padding: 5px 8px;
+  }
+  body.in-room .lang-card {
+    padding: 4px 10px;
+  }
+  body.in-room .interim-box {
+    padding: 5px 10px;
+  }
+  body.in-room .interim-text {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.in-room .orb-btn {
+    transition: none;
+  }
+}
+
+/* Online odada kisiye ozel renk: kamera cercevesi ve canli dokum kartlari */
+.p-tile.has-color {
+  border-color: color-mix(in srgb, var(--pc) 55%, transparent);
+}
+.p-tile.has-color.speaking {
+  border-color: var(--pc);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--pc) 32%, transparent);
+}
+.p-tile.has-color .p-avatar {
+  background: color-mix(in srgb, var(--pc) 20%, transparent);
+  color: var(--pc);
+}
+.msg-card.has-color {
+  border-color: color-mix(in srgb, var(--pc) 45%, transparent);
+  border-left: 3px solid var(--pc);
+}
+.msg-card.has-color .msg-speaker {
+  color: var(--pc);
+}
+
+/* Odadayken uygulama da linkle acilan sayfa gibi gorunur:
+   sekme sirasi gizlenir, modlar ust cubuktaki tek dugmeden secilir */
+.mode-menu-btn {
+  display: none;
+}
+html:not(.guest-mode) body.in-room .mode-menu-btn {
+  display: inline-flex;
+}
+body.in-room .mode-switch {
+  display: none !important;
+}
+
+/* Linkle acilan misafir sayfasi: oda kuramaz, oda kodunu gormez, davet uretemez */
+html.guest-mode #createRoomBtn,
+html.guest-mode #onlineRoomField,
+html.guest-mode .online-pill-live,
+html.guest-mode #copyInviteBtn,
+html.guest-mode #inviteLinkInput {
+  display: none !important;
+}
+.invite-note {
+  margin: 0;
+  flex: 1 1 100%;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--warn);
+}
+
+/* Kapida bekleyenler (yalnizca oda sahibi gorur) */
+.lobby-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-basis: 100%;
+}
+.lobby-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  background: rgba(250, 204, 21, 0.08);
+}
+.lobby-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lobby-item .online-btn {
+  flex-shrink: 0;
+}
+@media (min-width: 700px) and (orientation: landscape) {
+  body.in-room .online-active-row {
+    flex-wrap: wrap;
+  }
+  body.in-room .lobby-bar {
+    order: 7;
+  }
+}
+
+/* Kulaklik takiliyken: "Ben"in cevirisi telefondan da duyulsun */
+.audio-route-bar {
+  grid-column: 1 / -1; /* ana izgarada kendi satiri */
+  display: flex;
+  justify-content: center;
+}
+.audio-route-bar.hidden {
+  display: none;
+}
+.audio-route-btn {
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.audio-route-btn.active {
+  border-color: var(--me);
+  background: var(--me-soft);
+  color: var(--me);
+}
+.audio-route-btn:focus-visible {
+  outline: 2px solid var(--me);
+  outline-offset: 2px;
+}
+
+/* Cevrimdisi ceviri paketleri (Ayarlar) */
+.setting-row.column .setting-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.offline-langs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+.offline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.offline-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offline-status {
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+.offline-status.ok {
+  color: var(--me);
+}
+.offline-status.muted {
+  color: var(--text-muted);
+}
+.offline-dl {
+  flex-shrink: 0;
+}
+
+/* Disa aktarma secenekleri */
+.export-card {
+  max-width: 380px;
+}
+.export-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.export-options .online-btn {
+  width: 100%;
+  padding: 12px 16px;
+}
+.setting-row .offline-row .offline-name {
+  color: var(--text);
+}
+.audio-route-bar {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Ayni dildeki sesli sohbet: kamera dugmesinin yaninda ayni boyutta mikrofon */
+.p-self-tools {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.p-self-tools .p-cam-btn {
+  position: static;
+}
+.p-self-tools .p-kick-btn {
+  position: static;
+}
+.p-mic-btn,
+.p-listen-btn {
+  border: 1px solid var(--border-strong);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.p-mic-btn.on,
+.p-listen-btn.on {
+  background: var(--danger);
+  border-color: var(--danger);
+}
+.remote-audio {
+  display: none;
+}
+
+/* Hakkinda: lisans ve sorumluluk reddi */
+.about-card {
+  max-width: 560px;
+}
+.about-body {
+  max-height: 70vh;
+  overflow-y: auto;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.about-body h4 {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.95rem;
+}
+.about-body ol {
+  margin: 0;
+  padding-inline-start: 1.2rem;
+}
+.about-body li {
+  margin-bottom: 0.45rem;
+}
+.about-head {
+  margin: 0 0 0.6rem;
+  color: var(--text-muted, var(--text));
+}
+.about-accept {
+  margin: 0 0 0.4rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 10px;
+  border: 1px solid var(--border-strong);
+  font-weight: 600;
+}

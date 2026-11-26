@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CEVIRI_AYBARION - Yönetici anahtarı oluştur</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; line-height: 1.55; color: #1b1d22; }
+  label { display: block; margin-top: 14px; font-weight: 600; }
+  input { width: 100%; box-sizing: border-box; padding: 10px; font-size: 1rem; margin-top: 4px; }
+  button { margin-top: 18px; padding: 11px 18px; font-size: 1rem; cursor: pointer; }
+  pre { background: #f3f4f6; padding: 12px; white-space: pre-wrap; word-break: break-all; font-size: .8rem; }
+  .err { color: #b42318; }
+  .note { background: #fff7e6; border: 1px solid #f0c36d; padding: 10px 12px; border-radius: 8px; }
+</style>
+</head>
+<body>
+<h1>Yönetici anahtarı oluştur</h1>
+<p>Bu sayfa canlı destek için yönetici parolasını belirler ve sitede kullanılacak
+<code>support-config.js</code> dosyasını üretir. Her şey bu tarayıcıda yapılır; parola
+hiçbir yere gönderilmez ve dosyanın içinde yazılı durmaz.</p>
+<p class="note">Parolayı yalnızca site yöneticilerine verin. Parola değişirse bu sayfayla yeni
+bir dosya üretip sitedekiyle değiştirin; eski parola o andan itibaren çalışmaz.</p>
+<label>Site adı <input id="site" value="aybarion.com"></label>
+<label>Yönetici parolası (en az 8 karakter) <input id="p1" type="password" autocomplete="new-password"></label>
+<label>Parola tekrar <input id="p2" type="password" autocomplete="new-password"></label>
+<label><input id="tl" type="checkbox" style="width:auto"> Test girişi açık kalsın (yalnızca deneme için; gerçek sitede işaretlemeyin)</label>
+<label>Dökümlerin gönderileceği adres (isteğe bağlı, örn. https://aybarion.com/api/support/transcripts) <input id="up" placeholder="boş bırakılabilir"></label>
+<label>Canlı desteği iframe ile gömecek site adresi (isteğe bağlı, örn. https://aybarion.com) <input id="po" placeholder="boş bırakılabilir"></label>
+<button id="go" type="button">Dosyayı oluştur ve indir</button>
+<p id="msg"></p>
+<pre id="out" hidden></pre>
+<script src="support-crypto.js"></script>
+<script>
+document.getElementById('go').onclick = async function () {
+  var msg = document.getElementById('msg'), out = document.getElementById('out');
+  msg.className = ''; msg.textContent = '';
+  var p1 = document.getElementById('p1').value, p2 = document.getElementById('p2').value;
+  if (p1 !== p2) { msg.className = 'err'; msg.textContent = 'Parolalar aynı değil.'; return; }
+  try {
+    msg.textContent = 'Oluşturuluyor...';
+    var cfg = await AybaCrypto.generateAdminConfig(p1, document.getElementById('site').value);
+    cfg.testLogin = document.getElementById('tl').checked;
+    cfg.transcriptUploadUrl = document.getElementById('up').value.trim();
+    var po = document.getElementById('po').value.trim().replace(/\/+$/, '');
+    cfg.parentOrigins = po ? [po] : [];
+    var text = '// CEVIRI_AYBARION canli destek yapilandirmasi (yonetici anahtari).\n' +
+      '// Bu dosya parolayi icermez; parola olmadan yonetici girisi yapilamaz.\n' +
+      'window.AYBA_SUPPORT_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n';
+    out.textContent = text; out.hidden = false;
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' }));
+    a.download = 'support-config.js'; a.click();
+    msg.textContent = 'Hazır: support-config.js indirildi. Sitedeki canlı destek klasöründeki aynı adlı dosyanın yerine koyun.';
+  } catch (e) { msg.className = 'err'; msg.textContent = e.message; }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+name: Web surumunu yayinla (GitHub Pages)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  web:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Kodlari al
+        uses: actions/checkout@v5
+      - name: Node.js kur
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - name: Bagimliliklari yukle
+        run: npm ci
+      - name: Web dosyalarini hazirla
+        run: |
+          npm run copy-core
+          node scripts/write-web-url.js
+          touch www/.nojekyll
+      - name: GitHub Pages ayarla
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Web surumunu yukle
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+      - name: Yayinla
+        id: deploy
+        uses: actions/deploy-pages@v4
+
+  paket:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Siteye yuklenecek paketi hazirla
+        run: |
+          npm run copy-core
+          mkdir -p out/canli-destek
+          cp -r www/. out/canli-destek/
+          cp -r arac out/
+          cp docs/GELISTIRICI-KURULUM.md docs/DEVELOPER-SETUP.md LICENSE out/
+          cd out && zip -qr ../CEVIRI_AYBARION-canli-destek.zip .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: CEVIRI_AYBARION-canli-destek
+          path: CEVIRI_AYBARION-canli-destek.zip

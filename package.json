@@ -1,0 +1,20 @@
+{
+  "name": "ceviri-ayba",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CEVIRI_AYBARION - aybarion.com icin cevirili canli destek (tarayici)",
+  "scripts": {
+    "copy-core": "node scripts/copy-libs.js",
+    "test": "npm run copy-core && node tests/crypto.test.js && node tests/desk.test.js && node tests/support-room.test.js && node tests/relay.test.js && node tests/invite.test.js"
+  },
+  "dependencies": {
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "mqtt": "5.16.1"
+  },
+  "devDependencies": {
+    "aedes": "^0.51.3",
+    "ws": "^8.23.0"
+  },
+  "license": "UNLICENSED"
+}

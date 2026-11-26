@@ -1,0 +1,11 @@
+node_modules/
+out/
+*.apk
+.DS_Store
+www/mqtt.min.js
+
+# Imza anahtarlari asla depoya girmesin
+*.keystore
+*.jks
+www/lib/
+arac/support-crypto.js
