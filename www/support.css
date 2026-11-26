@@ -244,3 +244,38 @@ html.ayba .p-kick-btn,
 html.ayba .p-owner {
   display: none !important;
 }
+
+/* Bilgisayarda acilir dil listesi: yazilar her zaman okunur (koyu zemin, acik yazi) */
+html.ayba {
+  color-scheme: dark;
+}
+html.ayba select,
+html.ayba select option,
+html.ayba select optgroup {
+  color: #fafafa;
+}
+html.ayba select option,
+html.ayba select optgroup {
+  background-color: #18181d;
+}
+html.ayba select option:checked {
+  background-color: #2f2f38;
+}
+html.ayba select option:disabled {
+  color: #a1a1aa;
+}
+/* Gorusme sirasinda dil degistirilemez */
+html.ayba .lang-select:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+/* Ziyaretci dil secmeden soru soramaz */
+.ayba-lang-hint {
+  color: var(--warn);
+  margin: 10px 0 0;
+  font-size: 0.9rem;
+}
+html.ayba .online-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}

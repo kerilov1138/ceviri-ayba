@@ -27,6 +27,12 @@
     return ((u.firstName || u.name || '') + ' ' + (u.lastName || u.surname || '')).trim();
   }
 
+  // Gorusme sirasinda (ve sirada beklerken) dil degistirilemez
+  function lockLang(locked) {
+    var sel = $('myLangSelect');
+    if (sel) sel.disabled = Boolean(locked);
+  }
+
   function pubsub() {
     return window.CeviriRelay.pubsub;
   }
@@ -81,11 +87,57 @@
     show('aybaMemberWaiting', p === 'asking' || p === 'waiting');
     show('aybaMemberEnded', p === 'ended');
     show('aybaMemberInCall', p === 'call');
-    $('aybaAskBtn').disabled = p === 'asking';
+    lockLang(p === 'asking' || p === 'waiting' || p === 'call');
+    updateAskButton();
+  }
+
+  // Ziyaretci: dil hazir secili gelmez; dil secilmeden soru sorulamaz
+  var langChosen = false;
+  function updateAskButton() {
+    var ready = langChosen && member.phase !== 'asking';
+    $('aybaAskBtn').disabled = !ready;
+    show('aybaLangHint', !langChosen && (member.phase === 'idle' || member.phase === 'ended'));
+  }
+
+  function addLangPlaceholder() {
+    var sel = $('myLangSelect');
+    if (!sel || langChosen) return;
+    var ph = sel.querySelector('option[data-ayba-placeholder]');
+    if (!ph) {
+      ph = document.createElement('option');
+      ph.value = '';
+      ph.disabled = true;
+      ph.setAttribute('data-ayba-placeholder', '1');
+      sel.insertBefore(ph, sel.firstChild);
+    }
+    ph.textContent = '— ' + t('ayba.chooseLang') + ' —';
+    ph.selected = true;
+    sel.value = '';
+  }
+
+  function initMemberLang() {
+    var sel = $('myLangSelect');
+    addLangPlaceholder();
+    sel.addEventListener('change', function () {
+      if (sel.value) {
+        langChosen = true;
+        var ph = sel.querySelector('option[data-ayba-placeholder]');
+        if (ph) ph.remove();
+        updateAskButton();
+      }
+    });
+    // Arayuz dili degisince liste yeniden kurulur: secim yapilmadiysa bos kalsin
+    new MutationObserver(function () {
+      if (!langChosen && !sel.querySelector('option[data-ayba-placeholder]')) addLangPlaceholder();
+    }).observe(sel, { childList: true });
   }
 
   async function memberAsk() {
     if (member.phase === 'asking' || member.phase === 'waiting' || member.phase === 'call') return;
+    if (!langChosen) {
+      updateAskButton();
+      return;
+    }
     if (!cfg.adminPub) {
       App.showAlert(t('ayba.noConfig'));
       return;
@@ -151,6 +203,7 @@
   }
 
   function initMember() {
+    initMemberLang();
     $('aybaAskBtn').addEventListener('click', memberAsk);
     $('aybaCancelBtn').addEventListener('click', function () {
       memberStopDesk();
@@ -187,6 +240,7 @@
     show('aybaUnlock', p === 'locked');
     show('aybaConsole', p === 'console');
     show('aybaAdminCall', p === 'joining' || p === 'call');
+    lockLang(p === 'joining' || p === 'call');
     $('aybaCallStatus').textContent = p === 'joining' ? t('ayba.joining') : '';
   }
 
